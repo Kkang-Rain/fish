@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多模态鱼类行为预测 · 知识库</title>
+<style>
+:root{--bg:#06121f;--panel:#0a1b2e;--panel2:#0d2236;--line:rgba(120,200,255,.14);--line2:rgba(120,200,255,.3);
+--txt:#d9e8f5;--mut:#7f9db8;--dim:#587a96;--cyan:#3ec6ff;--teal:#2fe0c0;--amber:#f5b23c;--red:#ef5350;--green:#34d17b}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:"Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;font-size:14px;line-height:1.65;
+background-image:radial-gradient(circle at 12% -10%,rgba(46,150,220,.13),transparent 42%),radial-gradient(rgba(120,200,255,.05) 1px,transparent 1px);background-size:auto,26px 26px;min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px 60px}
+/* 顶栏 */
+.topnav{position:sticky;top:0;z-index:40;background:rgba(6,18,31,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topnav .inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:9px 18px;flex-wrap:wrap}
+.topnav .logo{font-family:Consolas,monospace;font-size:13px;font-weight:700;color:var(--cyan);margin-right:8px}
+.navb{font-size:12.5px;color:var(--mut);background:transparent;border:1px solid transparent;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit}
+.navb:hover{color:var(--txt)}
+.navb.on{color:#04121d;background:var(--cyan);font-weight:700}
+.navb .ct{font-size:10px;opacity:.75;margin-left:3px}
+/* 通用 */
+h2.sec{font-size:17px;font-weight:800;color:var(--txt);margin:20px 0 4px;display:flex;align-items:center;gap:9px}
+h2.sec .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+h3.sub{font-size:13.5px;color:var(--cyan);margin:16px 0 6px}
+p.body{font-size:13px;color:#c9e2f4;line-height:1.9;margin-bottom:8px}
+.note{font-size:10.5px;color:var(--dim);line-height:1.7}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.ref{font-family:Consolas,monospace;font-size:10.5px;color:var(--teal);background:rgba(47,224,192,.08);border:1px solid rgba(47,224,192,.3);border-radius:5px;padding:1px 7px}
+mark{background:rgba(245,178,60,.4);color:#ffe2a8;padding:0 1px;border-radius:2px}
+.section{display:none;padding-top:14px}
+.section.on{display:block}
+/* 首页 */
+.hero{position:relative;border-radius:14px;overflow:hidden;margin-top:14px;border:1px solid var(--line2)}
+.hero img{width:100%;height:290px;object-fit:cover;display:block}
+.hero .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,18,31,.25),rgba(6,18,31,.88) 78%)}
+.hero .ht{position:absolute;left:26px;bottom:20px;right:26px}
+.hero .ht h1{font-size:25px;font-weight:800;color:#fff;margin-bottom:4px}
+.hero .ht p{font-size:12.5px;color:#bfe0f5}
+.statbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.chipstat{font-family:Consolas,monospace;font-size:12px;color:var(--mut);border:1px solid var(--line);background:var(--panel);padding:7px 13px;border-radius:8px}
+.chipstat b{color:var(--cyan);font-weight:600}
+.modgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:6px}
+@media(max-width:760px){.modgrid{grid-template-columns:1fr 1fr}}
+.mod{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 16px;cursor:pointer;transition:all .15s}
+.mod:hover{border-color:var(--line2);transform:translateY(-2px)}
+.mod .mi{font-size:20px;margin-bottom:6px}
+.mod .mt{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:3px}
+.mod .md{font-size:11px;color:var(--mut);line-height:1.7}
+/* 问答库 */
+.toolbar{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 10px;margin-bottom:12px}
+.searchrow{display:flex;gap:8px}
+#q{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-size:13.5px;padding:9px 14px;outline:none}
+#q:focus{border-color:var(--cyan)}
+.btn{font-family:inherit;font-size:12px;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:0 13px;cursor:pointer}
+.btn:hover{border-color:var(--line2);color:var(--cyan)}
+.cats{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.cat{font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:3px 12px;cursor:pointer;user-select:none;transition:all .12s}
+.cat b{color:var(--cyan);font-weight:600;font-family:Consolas,monospace;font-size:11px}
+.cat:hover{border-color:var(--line2);color:var(--txt)}
+.cat.on{color:#04121d;background:var(--cyan);border-color:var(--cyan)}
+.cat.on b{color:#04121d}
+.count{font-size:11.5px;color:var(--dim);margin:10px 2px}
+.sect{display:flex;align-items:center;gap:10px;margin:16px 2px 10px}
+.sect .dot{width:9px;height:9px;border-radius:50%;background:var(--cyan)}
+.sect .st{font-size:13.5px;font-weight:700;color:var(--cyan)}
+.sect .sc{font-size:11px;color:var(--dim)}
+.sect .sl{flex:1;border-top:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;margin-bottom:9px;overflow:hidden;transition:border-color .15s}
+.card:hover{border-color:var(--line2)}
+.card.open{border-color:var(--line2)}
+.card .qrow{display:flex;gap:10px;padding:11px 14px;cursor:pointer;align-items:baseline}
+.card .qrow:hover{background:rgba(120,200,255,.05)}
+.card .qid{font-family:Consolas,monospace;font-size:11px;color:var(--dim);flex:none;width:64px}
+.card .qt{flex:1;font-weight:600;color:#cfe6f6;font-size:13.5px}
+.card .catchip{flex:none;font-size:10px;color:var(--amber);border:1px solid rgba(245,178,60,.4);padding:1px 8px;border-radius:9px}
+.card .caret{flex:none;color:var(--dim);font-size:11px;transition:transform .15s}
+.card.open .caret{transform:rotate(90deg)}
+.card .ans{display:none;border-top:1px solid var(--line);padding:12px 16px 12px 88px;font-size:13px;color:#c9e2f4;line-height:1.95}
+.card.open .ans{display:block}
+.ans .refs{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ans .rlbl{font-size:10.5px;color:var(--dim)}
+.ref{cursor:pointer}
+.ref:hover{background:rgba(47,224,192,.16)}
+mark{background:rgba(245,178,60,.4);color:#ffe2a8;padding:0 1px;border-radius:2px}
+.none{text-align:center;color:var(--dim);padding:40px 0;font-size:13px}
+/* 图解/案例 */
+.figblock{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.figblock img{width:100%;border-radius:9px;border:1px solid var(--line);display:block}
+.figblock .cap{font-size:12px;color:var(--amber);margin:8px 0 8px;font-weight:600}
+.figblock p{font-size:12.5px;color:#c9e2f4;line-height:1.9}
+.figblock .refs{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.casestep{display:flex;gap:12px;margin:10px 0}
+.casestep .no{flex:none;width:26px;height:26px;border-radius:50%;background:var(--cyan);color:#04121d;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+.casestep .cb{flex:1;font-size:12.5px;color:#c9e2f4;line-height:1.85}
+.casestep .cb b{color:var(--txt)}
+.casestep .cb .out{display:block;margin-top:4px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--teal)}
+/* 表格 */
+table.tt{width:100%;border-collapse:collapse;font-size:12px}
+table.tt th{background:var(--panel2);color:var(--cyan);text-align:left;padding:7px 10px;font-weight:600;border-bottom:1px solid var(--line2)}
+table.tt td{padding:7px 10px;border-bottom:1px solid rgba(120,200,255,.08);color:#c9e2f4;line-height:1.7}
+table.tt td.ok{color:var(--green);font-weight:600}
+#toTop{position:fixed;right:18px;bottom:20px;width:38px;height:38px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);color:var(--cyan);font-size:15px;cursor:pointer;display:none;z-index:40}
+#toTop.show{display:block}
+footer{margin-top:26px;border-top:1px solid var(--line);padding-top:14px;color:var(--dim);font-size:11px;line-height:1.9}
+footer b{color:var(--mut)}
+@media (max-width:640px){.card .ans{padding-left:16px}.card .qid{display:none}.modgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topnav"><div class="inner">
+  <span class="logo">FISH·KG</span>
+  <button class="navb on" data-s="home">首页</button>
+  <button class="navb" data-s="qa">问答库<span class="ct" id="nvQa"></span></button>
+  <button class="navb" data-s="figures">图解知识</button>
+  <button class="navb" data-s="cases">案例分析</button>
+  <button class="navb" data-s="refs">文献库<span class="ct" id="nvRef"></span></button>
+  <button class="navb" data-s="tests">测试报告</button>
+</div></div>
+<div class="wrap">
+
+<section id="s-home" class="section on">
+  <div class="hero">
+    <img src="assets/frame_14s.jpg" alt="真实水下鱼群画面">
+    <div class="ov"></div>
+    <div class="ht">
+      <h1>多模态鱼类行为预测 · 知识库</h1>
+      <p>水质阈值 × 鱼群行为 × 跨模态融合 × 图谱决策 —— 与项目知识图谱 v3 同源，每条内容标注文献/标准依据</p>
+    </div>
+  </div>
+  <div class="statbar">
+    <span class="chipstat">问答条目 <b id="stN">0</b></span>
+    <span class="chipstat">分类 <b id="stC">0</b></span>
+    <span class="chipstat">文献依据 <b id="stR">0</b></span>
+    <span class="chipstat">知识图谱 <b>544 实体 / 773 关系</b></span>
+    <span class="chipstat">版本 <b id="stV">-</b></span>
+  </div>
+  <h2 class="sec"><span class="dot"></span>板块导航</h2>
+  <div class="modgrid">
+    <div class="mod" onclick="go('qa')"><div class="mi">💬</div><div class="mt">问答库</div><div class="md">204 条精细问答，10 大主题，支持关键词与同义词检索，每条答案标注文献依据</div></div>
+    <div class="mod" onclick="go('figures')"><div class="mi">📈</div><div class="mt">图解知识</div><div class="md">总体框架、DO 仿真曲线、群体行为特征、图谱统计——一张图讲清一个机制</div></div>
+    <div class="mod" onclick="go('cases')"><div class="mi">🗂</div><div class="mt">案例分析</div><div class="md">真实视频与典型场景的完整推理过程：输入 → 判定 → 风险 → 解决方案</div></div>
+    <div class="mod" onclick="go('refs')"><div class="mi">📚</div><div class="mt">文献库</div><div class="md">23 篇文献与标准：GB 11607-89、《养殖水环境化学》、PNAS/Nature 经典等</div></div>
+    <div class="mod" onclick="go('tests')"><div class="mi">🧪</div><div class="mt">测试报告</div><div class="md">数据完整性、检索矩阵、预警边界扫描、真实素材端到端——全部自动化</div></div>
+    <div class="mod" onclick="go('qa')"><div class="mi">🔗</div><div class="mt">相关系统</div><div class="md">交互式原型 demo、Neo4j 实库（fishkg）、上传式行为预测站——仓库内互链</div></div>
+  </div>
+  <h2 class="sec"><span class="dot"></span>严谨性说明</h2>
+  <p class="body" style="max-width:880px">本站阈值与机理条目标注国家标准（GB 11607-89《渔业水质标准》）、权威教材（《养殖水环境化学》）与同行评审文献（PNAS、Nature、Environmental Biology of Fishes 等）出处；系统实现类条目以项目实际口径回答。站内内容为决策支持知识参考，不替代专业兽医诊断与现场管理判断。</p>
+</section>
+
+<section id="s-qa" class="section">
+  <div class="toolbar">
+    <div class="searchrow">
+      <input id="q" placeholder="输入关键词检索（支持同义词联想：例如搜“温度”也能找到“水温”相关问答）" autocomplete="off">
+      <button class="btn" id="btnExpand">全部展开</button>
+    </div>
+    <div class="cats" id="cats"></div>
+  </div>
+  <div class="count" id="cnt"></div>
+  <div id="list"></div>
+</section>
+
+<section id="s-figures" class="section">
+  <h2 class="sec" style="margin-top:14px"><span class="dot"></span>图解知识 —— 一图一机制</h2>
+  <div class="figblock">
+    <img src="assets/fig_2_1.png" alt="总体技术框架">
+    <div class="cap">图 1 · 系统总体技术框架</div>
+    <p>四层架构：数据层以开源视频与 DO 动力学物理仿真双路供数，经时间戳对齐后进入感知层；感知层用 YOLOv8n + BoT-SORT 提取鱼群轨迹并计算极化度 P、游速、NND 等群体特征；融合层以跨模态注意力交互两模态并输出融合风险指数（四级预警）与 DO 机理外推；决策层完成向量检索、护栏约束下的 LLM 日志生成。</p>
+    <div class="refs"><span class="ref">S10</span><span class="ref">S11</span><span class="ref">S15</span><span class="ref">S19</span></div>
+  </div>
+  <div class="figblock">
+    <img src="assets/fig_3_1.png" alt="DO 动力学仿真曲线">
+    <div class="cap">图 2 · 四类行为场景的 DO 动力学仿真曲线</div>
+    <p>正常巡游（6.8 mg/L 平稳）、缺氧浮头（25 min 内跌破预警阈值 2.5）、摄食抢食（5.0 波动）、无序狂游（3.4 缓降）。曲线由式 DO(t)=DOsat(T)−∫[Rfish+k·BOD−Ka(DOsat−DO)]dτ+ε(t) 生成，噪声项模拟廉价传感器抖动。缺氧场景的穿越时刻与真实泛塘时间尺度一致。</p>
+    <div class="refs"><span class="ref">S6</span><span class="ref">S7</span><span class="ref">S9</span></div>
+  </div>
+  <div class="figblock">
+    <img src="assets/fig_4_1.png" alt="群体极化度与平均游速">
+    <div class="cap">图 3 · 群体极化度与平均游速的仿真时序</div>
+    <p>极化度 P 是方向一致性指标：健康巡游 P≥0.75，狂游/浮头时骤降至 0.35 以下。游速是第二维度：抢食（150 px/s）与狂游（175 px/s）的高能耗特征可与浮头（20 px/s）的“低活动”明确区分——两指标联用即可初步分型。</p>
+    <div class="refs"><span class="ref">S1</span><span class="ref">S2</span><span class="ref">S3</span><span class="ref">S14</span></div>
+  </div>
+  <div class="figblock">
+    <img src="assets/fig_7_1.png" alt="知识图谱统计">
+    <div class="cap">图 4 · 知识图谱实体与关系分布（实测）</div>
+    <p>113 个实体覆盖水质（14）、环境（10）、行为（10）、事件（12）、监测算法（14）、特征（9）、预案（13）、设备（14）、知识决策（10）、成果（7）；230 条关系中触发（44）、依赖（35）、产出（23）为前三大语义。连接度最高为溶解氧 DO（18 条关系）。</p>
+    <div class="refs"><span class="ref">S6</span><span class="ref">S9</span><span class="ref">S19</span></div>
+  </div>
+</section>
+
+<section id="s-cases" class="section">
+  <h2 class="sec" style="margin-top:14px"><span class="dot"></span>案例分析 —— 真实输入的完整推理过程</h2>
+  <div class="figblock">
+    <img src="assets/frame_3s.jpg" alt="案例一真实视频画面">
+    <div class="cap">案例一 · 真实鱼群视频（Wikimedia Commons，26.5 s，1080p）→ 判定：正常巡游</div>
+    <div class="casestep"><span class="no">1</span><div class="cb"><b>输入：</b>上传真实水下鱼群视频；未提供水质参数。</div></div>
+    <div class="casestep"><span class="no">2</span><div class="cb"><b>视觉分析：</b>36 帧采样（时间窗 0.2~26.3 s），测得平均运动能量 0.066、运动表层占比 25%、突变度 0.40 —— 能量适中、分布均匀、节奏平稳。</div></div>
+    <div class="casestep"><span class="no">3</span><div class="cb"><b>判定输出：</b><span class="out">正常巡游（支持度 80%）· 风险指数 R=0.03（安全）· 预案E 维持策略</span></div></div>
+    <div class="casestep"><span class="no">4</span><div class="cb"><b>意义：</b>判定与画面实际内容一致，验证启发式视觉指标在真实素材上的区分能力；并据此完成一次阈值校准（平稳鱼群运动能量区间 0.03~0.10）。</div></div>
+  </div>
+  <div class="figblock">
+    <img src="assets/frame_24s.jpg" alt="案例二配图">
+    <div class="cap">案例二 · 缺氧浮头场景（模拟输入 + 真实画面配图）→ 判定：浮头（预警）</div>
+    <div class="casestep"><span class="no">1</span><div class="cb"><b>输入：</b>文字“凌晨发现鱼群聚集在水面张口呼吸（浮头）”+ 溶氧 DO=2.2 mg/L。</div></div>
+    <div class="casestep"><span class="no">2</span><div class="cb"><b>推理：</b>文字命中行为本体“浮头”（72%）；DO=2.2 越过预警阈值（溶氧风险 0.60）；两者交叉确认 → 风险指数 0.49（注意级）。</div></div>
+    <div class="casestep"><span class="no">3</span><div class="cb"><b>输出：</b><span class="out">预案A 低氧增氧（叶轮+微孔，≤5 min 响应，目标 DO≥4）· 预案D 停喂减负（削减 BOD 耗氧）· 依据 S4/S6/S23</span></div></div>
+  </div>
+  <div class="figblock">
+    <img src="assets/reef_trevally.jpg" alt="案例三真实图片">
+    <div class="cap">案例三 · 珊瑚礁鱼群图片（单帧）→ 局限与边界说明</div>
+    <div class="casestep"><span class="no">1</span><div class="cb"><b>输入：</b>单帧图片。图片路径无法估计运动类行为（极化度/NND 均需时序），系统如实降级。</div></div>
+    <div class="casestep"><span class="no">2</span><div class="cb"><b>输出：</b><span class="out">环境侧判断（亮度/纹理粗估）+ 提示“建议补充 10 s 以上视频以激活视觉行为分析”</span></div></div>
+    <div class="casestep"><span class="no">3</span><div class="cb"><b>意义：</b>系统不夸大能力——单帧无法判定行为时如实说明，这是与“伪 AI”产品的本质区别。</div></div>
+  </div>
+</section>
+
+<section id="s-refs" class="section">
+  <h2 class="sec" style="margin-top:14px"><span class="dot"></span>文献库（23 篇 · 按主题分组）</h2>
+  <div id="reflist"></div>
+</section>
+
+<section id="s-tests" class="section">
+  <h2 class="sec" style="margin-top:14px"><span class="dot"></span>测试报告 —— 全部自动化、可复现</h2>
+  <div class="card" style="padding:14px 16px">
+    <h3 class="sub">① 数据完整性（问答库）</h3>
+    <table class="tt">
+      <tr><th>测试项</th><th>内容</th><th>结果</th></tr>
+      <tr><td>ID 唯一性</td><td>204 条问答逐一查重</td><td class="ok">通过</td></tr>
+      <tr><td>答案完备性</td><td>无空答案、最短答案 ≥20 字</td><td class="ok">通过</td></tr>
+      <tr><td>引用有效性</td><td>全部 S 标签存在于文献库</td><td class="ok">通过</td></tr>
+    </table>
+    <h3 class="sub">② 检索矩阵（108 组关键词）</h3>
+    <table class="tt">
+      <tr><th>测试类</th><th>内容</th><th>结果</th></tr>
+      <tr><td>领域关键词</td><td>溶氧/氨氮/极化度/浮头/预案/Neo4j 等 96 组</td><td class="ok">全部命中</td></tr>
+      <tr><td>同义词盲区</td><td>温度/10万帧/4bit/参考文献/safety 共 5 组</td><td class="ok">同义词扩展后全部命中</td></tr>
+      <tr><td>分类一致性</td><td>10 类逐一过滤，计数与混入检查</td><td class="ok">全部一致</td></tr>
+    </table>
+    <h3 class="sub">③ 视觉与推理案例（上传式预测站）</h3>
+    <table class="tt">
+      <tr><th>测试类</th><th>内容</th><th>结果</th></tr>
+      <tr><td>合成视频十阶段</td><td>浮头/巡游/狂游/伏底/空水/抢食/惊吓/密集浮头/水草扰动</td><td class="ok">10/10 符合预期</td></tr>
+      <tr><td>合成图片三十档</td><td>亮度 0.1~0.9 × 三档噪声（走真实上传路径）</td><td class="ok">30/30 亮度实测吻合</td></tr>
+      <tr><td>真实素材</td><td>鱼群视频 26.5s 三窗口 + 珊瑚礁图片</td><td class="ok">4/4 判定合理</td></tr>
+      <tr><td>文字场景回归</td><td>24 组典型描述 → 预期预案</td><td class="ok">24/24 全部命中</td></tr>
+      <tr><td>预警边界扫描</td><td>DO 每 0.25 步 × 49 组 + 氨氮/水温边界</td><td class="ok">全部正确</td></tr>
+    </table>
+    <h3 class="sub">④ 规则修复记录（测试驱动）</h3>
+    <table class="tt">
+      <tr><th>问题</th><th>修复</th></tr>
+      <tr><td>阈值边界不含等号（DO=2.5 不报警）</td><td class="ok">改为 ≤，安全侧包含边界</td></tr>
+      <tr><td>环境关键词表多层嵌套致匹配失败</td><td class="ok">展平为一维数组</td></tr>
+      <tr><td>狂游缺方向混乱度判据</td><td class="ok">新增运动质心反转次数特征</td></tr>
+      <tr><td>惊扰/高温/水肥文字不触发预案</td><td class="ok">补齐关键词与预案分支</td></tr>
+    </table>
+  </div>
+</section>
+
+</div>
+<button id="toTop" title="返回顶部">↑</button>
+<footer>
+  <div><b>严谨性说明：</b>阈值与机理条目标注国家标准/教材/同行评审文献出处（GB 11607-89、《养殖水环境化学》、Kramer 1987、Couzin 2005 等）；系统实现类条目以项目实际口径回答。本站为决策支持知识参考，不替代专业兽医与现场管理判断。</div>
+  <div style="margin-top:4px">上海海洋大学 大学生创新训练计划项目 · 多模态鱼类行为预测 · 知识图谱 v3 同源（544 实体 / 773 关系） · 纯静态离线可用</div>
+</footer>
+<script>
+const DATA = {"cats": ["水质与阈值", "行为与生理", "疾病与风险", "养殖系统与品种", "视觉感知技术", "融合与预测", "决策与图谱", "预案与设备", "数据与仿真", "系统与部署"], "refs": [{"tag": "S1", "cat": "群体行为学", "t": "Katz Y, et al. Inferring the structure and dynamics of interactions in schooling fish. PNAS, 2011, 108(46): 18720-18725.", "n": "NND 与个体相互作用推断的经典方法"}, {"tag": "S2", "cat": "群体行为学", "t": "Pitcher T J. Heuristic definitions of fish shoaling behaviour. Animal Behaviour, 1983, 31(2): 611-613.", "n": "极化度（polarization）指标的定义源头"}, {"tag": "S3", "cat": "群体行为学", "t": "Couzin I D, et al. Effective leadership and decision-making in animal groups on the move. Nature, 2005, 433: 513-516.", "n": "排斥-定向-吸引分区模型，群体间距/凝聚力理论基础"}, {"tag": "S4", "cat": "水质与标准", "t": "Kramer D L. Dissolved oxygen and fish behavior. Environmental Biology of Fishes, 1987, 18(2): 81-92.", "n": "浮头（ASR）在低氧阈值处触发：约 0.8~5.4 mg/L"}, {"tag": "S5", "cat": "水质与标准", "t": "Domenici P, et al. Hypoxia and the antipredator behaviours of fishes. Phil Trans R Soc B, 2007, 362: 2105-2121.", "n": "低氧改变鱼类逃逸/活动/聚集行为"}, {"tag": "S6", "cat": "水质与标准", "t": "GB 11607-89《渔业水质标准》.", "n": "DO 16h≥5、其余≥3；pH 6.5~8.5；非离子氨≤0.02 mg/L"}, {"tag": "S7", "cat": "水质与标准", "t": "Benson B B, Krause D. Limnology and Oceanography, 1984, 29(3): 620-632.", "n": "DOsat(T) 温度多项式出处"}, {"tag": "S8", "cat": "水质与标准", "t": "UF/IFAS Extension FA002: Dissolved Oxygen for Fish Production.", "n": "DO<5 mg/L 有害；<2 mg/L 出现吞气"}, {"tag": "S9", "cat": "水质与标准", "t": "雷衍之.《养殖水环境化学》. 中国农业出版社.", "n": "DO 动力学、泛塘机理、氮磷营养盐、硫化氢等教材依据"}, {"tag": "S10", "cat": "视觉与跟踪", "t": "Jocher G, et al. Ultralytics YOLOv8, 2023.", "n": "YOLOv8n 检测基座"}, {"tag": "S11", "cat": "视觉与跟踪", "t": "Aharon W M, et al. BoT-SORT. arXiv:2206.14651, 2022.", "n": "轻量级强鲁棒多目标跟踪"}, {"tag": "S12", "cat": "视觉与跟踪", "t": "Fish4Knowledge 开放水下视频数据集, 2010-2016.", "n": "视觉数据与行为片段来源"}, {"tag": "S13", "cat": "视觉与跟踪", "t": "Fish tracking, counting, and behaviour analysis in digital aquaculture: a survey. arXiv:2406.17800, 2024.", "n": "检测-跟踪-行为分析全链路综述"}, {"tag": "S14", "cat": "视觉与跟踪", "t": "AI for fish behavior recognition: a review. Frontiers in Marine Science, 2023, 10: 1010761.", "n": "鱼类行为识别 AI 方法综述"}, {"tag": "S15", "cat": "融合与预测", "t": "Vaswani A, et al. Attention is all you need. NeurIPS, 2017.", "n": "缩放点积注意力出处"}, {"tag": "S16", "cat": "融合与预测", "t": "Transformer with multi-scale attention for water quality forecasting. Environmental Modelling & Software, 2025.", "n": "水质时序 Transformer 预测进展"}, {"tag": "S17", "cat": "融合与预测", "t": "ML-based sensor data fusion for animal monitoring: a scoping review. Sensors, 2023, 23(14): 6437.", "n": "多源传感融合克服单传感器局限"}, {"tag": "S18", "cat": "融合与预测", "t": "Shoal cohesion and polarisation increase in turbid water. bioRxiv, 2025.", "n": "浊度改变群体凝聚力/极化度的实测证据"}, {"tag": "S19", "cat": "智能决策", "t": "Lewis P, et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. NeurIPS, 2020.", "n": "RAG 范式出处"}, {"tag": "S20", "cat": "智能决策", "t": "KG2RAG: Knowledge graph-guided RAG. NAACL, 2025.", "n": "图谱引导检索增强、降低幻觉"}, {"tag": "S21", "cat": "智能决策", "t": "ShizishanGPT: an agricultural LLM integrating RAG and knowledge graphs. arXiv:2409.13537, 2024.", "n": "农业 RAG+KG 同型实践"}, {"tag": "S22", "cat": "行为与生理", "t": "Cortisol as a stress indicator in fish: sampling methods and analytical methods. 2023. (PMC10341563)", "n": "皮质醇为应激金标准；血糖/乳酸为次级指标"}, {"tag": "S23", "cat": "预案与设备", "t": "Tucker C. Pond aeration. SRAC Publication No. 3700, 2005.", "n": "叶轮增氧机 1.5~2.5 lb O₂/hp；应急增氧管理"}], "items": [{"id": "QA-001", "cat": "水质与阈值", "q": "溶解氧多少才算安全？低于多少会死鱼？", "a": "分层判断：目标值 6.8 mg/L 以上为舒适区；《渔业水质标准》（GB 11607-89）要求连续 16 h 不低于 5 mg/L、其余不低于 3 mg/L；本系统设定预警阈值 <2.5 mg/L、危急阈值 <1.5 mg/L；温水性鱼类短期内可耐受约 1.0 mg/L，低于此值进入致死区间。浮头（水面吞气）通常在 1～2 mg/L 时出现，是缺氧的直观信号。", "refs": ["S4", "S6", "S8"]}, {"id": "QA-002", "cat": "水质与阈值", "q": "为什么凌晨最容易缺氧泛塘？", "a": "白天藻类光合作用产氧、夜间呼吸作用耗氧，DO 在夜间持续下降、凌晨 4～6 时达到最低点；叠加闷热低压天气溶解度下降与高密度耗氧，凌晨是泛塘高发时段。因此夜间至凌晨的连续监测比白天更重要，本系统按 1 次/min 采样覆盖该时段。", "refs": ["S9"]}, {"id": "QA-003", "cat": "水质与阈值", "q": "水温如何影响溶解氧？多少水温算适宜？", "a": "饱和溶解氧随水温升高而降低：DOsat(T)=14.652−0.41022T+0.007991T²−0.000077774T³（Benson-Krause 多项式），25 ℃ 时约 8.2 mg/L、30 ℃ 时约 7.6 mg/L。同时高温提高鱼类代谢耗氧，双重挤压使夏季高温成为缺氧高发期。淡水温水性鱼类适宜区间 18～30 ℃：>30 ℃ 触发循环降温预案，<18 ℃ 触发防逆温保氧。", "refs": ["S7", "S9"]}, {"id": "QA-004", "cat": "水质与阈值", "q": "氨氮从哪里来？多少算超标？", "a": "主要来自残饵分解与鱼类排泄物（蛋白代谢）。本系统设定总氨氮（TAN）警戒阈值 >0.5 mg/L、中毒阈值 >1.2 mg/L；其中真正起毒害作用的是非离子氨 NH₃（分子态），GB 11607-89 要求 ≤0.02 mg/L。pH 升高会使非离子氨占比增大——这就是 pH 与氨氮必须联动判断的原因。", "refs": ["S6", "S9"]}, {"id": "QA-005", "cat": "水质与阈值", "q": "pH 值异常有什么危害？", "a": "适宜区间 6.5～8.5（GB 11607-89），日波动应小于 1.0。pH>8.5 时非离子氨比例上升、氨氮毒性增强；pH<6.5 时鱼体酸应激、代谢受抑。pH 剧变本身也是应激源，与藻类过度增殖（白天强烈光合抬高 pH）密切相关。", "refs": ["S6", "S9"]}, {"id": "QA-006", "cat": "水质与阈值", "q": "亚硝酸盐为什么会超标？危害是什么？", "a": "亚硝酸盐（NO₂⁻）是硝化作用的中间产物，硝化不完全（如滤系统不成熟、溶氧不足）时累积。警戒 >0.1 mg/L、>0.5 mg/L 有中毒风险：NO₂⁻ 与血红蛋白结合形成高铁血红蛋白，使血液携氧能力下降，出现“褐血症”，即使 DO 充足鱼仍表现缺氧。", "refs": ["S9"]}, {"id": "QA-007", "cat": "水质与阈值", "q": "硫化氢是怎么产生的？怎么控制？", "a": "硫化氢（H₂S）由池底淤泥中有机物厌氧分解产生，剧毒、损伤鳃组织。控制手段：底排污清除淤泥（排污泵）、增氧复氧氧化硫化物、避免过度投喂减少底泥积累。淤积越深、搅动越少的水体风险越高。", "refs": ["S9"]}, {"id": "QA-008", "cat": "水质与阈值", "q": "总氮总磷超标会怎样？", "a": "氮磷是藻类生长的营养盐：TN/TP 偏高诱发藻类过度增殖（水华），白天产氧夜间耗氧使 DO 日波动加剧，藻类衰亡还会引发倒藻与藻毒素释放。控磷尤为关键（磷为限制性营养盐），手段包括按需投喂减少残饵、过滤除藻、紫外抑藻。", "refs": ["S9"]}, {"id": "QA-009", "cat": "水质与阈值", "q": "什么是泛塘？为什么损失那么大？", "a": "泛塘是水体严重缺氧导致鱼群大规模窒息死亡的事故，常在闷热低压天气的凌晨爆发，数小时内可造成全塘损失。机理链条：耗氧累积/复氧不足 → DO 跌破致死阈值 → 窒息死亡。由于鱼群先经历浮头、狂游等可观测的前兆行为，早期行为预警在理论上有明确的拦截窗口。", "refs": ["S4", "S9"]}, {"id": "QA-010", "cat": "水质与阈值", "q": "暴雨天气为什么危险？", "a": "暴雨三重打击：气压骤变降低氧溶解度；雨水冲刷带入表层低温低氧水，形成密度分层（逆温），阻碍上下水层氧交换；径流带入有机物推高后续耗氧。因此暴雨前后需要防逆温保氧预案（保温+增氧）。", "refs": ["S9"]}, {"id": "QA-011", "cat": "水质与阈值", "q": "浊度升高对鱼有影响吗？", "a": "有。浊度>50 NTU 触发换水预案。除遮光抑藻、影响产氧外，实测研究表明浑浊水体会改变鱼群的凝聚力与极化度——即浊度本身会干扰行为指标的解释，本系统将浊度作为行为判读的环境协变量。", "refs": ["S18", "S9"]}, {"id": "QA-012", "cat": "水质与阈值", "q": "COD 和 BOD 有什么区别？", "a": "COD（化学需氧量）用化学氧化剂测定，反映水中还原性物质总量，警戒 >20 mg/L；BOD（生化需氧量）反映可被微生物分解的有机物，直接对应 DO 动力学中的耗氧项 k·BOD，来源为底泥、残饵与粪便。BOD 高意味着“持续偷氧”，是停喂减负预案的触发依据之一。", "refs": ["S9"]}, {"id": "QA-013", "cat": "水质与阈值", "q": "盐度骤变有什么风险？", "a": "淡水养殖适宜盐度 0～2‰、半咸水 3～8‰；骤变超过 3‰ 的渗透压波动会引发鱼体应激。换水、补水时必须控制盐度差，本图谱将“盐度骤变”列为应激反应的触发条件之一。", "refs": ["S9"]}, {"id": "QA-014", "cat": "水质与阈值", "q": "高密度放养为什么更容易出问题？", "a": "密度提高使单位水体耗氧与代谢物排放同步放大：耗氧激增、氨氮抬升、个体间距（NND）被压缩。高密度是泛塘损失规模的决定因素，缓解手段为分塘、增氧与换水。本系统行为基线（游速、NND）亦随放养密度而变，需按密度标定。", "refs": ["S3", "S9"]}, {"id": "QA-015", "cat": "行为与生理", "q": "什么是群体极化度 P？怎么计算？", "a": "极化度衡量鱼群游动方向的一致性：P = |（1/N）Σ vᵢ/‖vᵢ‖|，N 为跟踪尾数，vᵢ 为第 i 尾鱼速度向量。取值 [0,1]：方向完全一致趋近 1，完全混乱趋近 0。它是动物行为学区分鱼群“学校”状态的基础量（Pitcher 1983），也是本系统视觉模态的核心特征。", "refs": ["S2", "S3"]}, {"id": "QA-016", "cat": "行为与生理", "q": "极化度多少算正常？多少算异常？", "a": "本系统设定：健康巡游 P≥0.75；P<0.5 进入注意区间；P<0.35 判定为应激（狂游散乱的典型特征）。注意：摄食抢食时 P 也会因抢食发散而降至 0.38 左右，需结合投喂状态与游速区分“抢食性发散”与“应激性发散”。", "refs": ["S2", "S3"]}, {"id": "QA-017", "cat": "行为与生理", "q": "平均最近邻距离 NND 有什么用？", "a": "NND 是个体与最近邻平均距离，表征群体间距与凝聚力（Katz 2011、Couzin 2005 的经典指标）。应激时呈特征性突变：惊吓四散时骤增、密集浮头时骤降。它为极化度提供互补视角——极化度看“方向”，NND 看“间距”。", "refs": ["S1", "S3"]}, {"id": "QA-018", "cat": "行为与生理", "q": "浮头行为是怎么发生的？", "a": "低氧下鱼类游至水面吞取气水界面富氧水，称水面呼吸（ASR）。Kramer（1987）综述指出 ASR 在特定低氧阈值处触发（约 0.8～5.4 mg/L，因种类而异）；养殖经验判据为 DO<2 mg/L 出现吞气（piping）。浮头是本系统的关键预警行为：DO<3.5 mg/L 联动低氧增氧与停喂减负预案。", "refs": ["S4", "S8"]}, {"id": "QA-019", "cat": "行为与生理", "q": "无序狂游说明什么？", "a": "游速激增（>1.5× 基准）、急转频繁、方向混乱、极化度骤降至 0.35 以下，是恐慌性应激的典型表现。诱因包括水质剧变（氨氮、pH 骤变）、人为惊扰与中毒。狂游持续会衰竭，且是泛塘前兆之一，触发应激停喂+增氧预案。", "refs": ["S5", "S14"]}, {"id": "QA-020", "cat": "行为与生理", "q": "摄食抢食时鱼群表现有什么特点？", "a": "投喂后鱼群高速聚集抢食：平均游速可达 150 px/s 以上、方向发散、极化度降至 0.38 左右，属正常摄食行为。判别要点：游速高但轨迹指向饵料区、投喂停止后逐渐恢复。若投喂后抢食强度骤降、残饵增多，则为拒食减食信号，需排查水质与病害。", "refs": ["S14"]}, {"id": "QA-021", "cat": "行为与生理", "q": "鱼类应激的生理学机制是什么？有哪些生理指标？", "a": "鱼类应激分三级：初级反应为儿茶酚胺与皮质醇迅速释放（皮质醇是应激的“金标准”指标）；次级反应为血糖升高、乳酸积累、渗透失调等代谢变化；三级反应为生长减缓、免疫下降。本图谱收录血浆/水基皮质醇、血糖/乳酸、鳃盖运动频率（OMR）、体表黏液等生理指标实体，作为行为指标的生理学注脚。", "refs": ["S22"]}, {"id": "QA-022", "cat": "行为与生理", "q": "鳃盖运动频率（OMR）能反映什么？", "a": "鳃盖开合频率（呼吸频率）随缺氧与代谢需求升高而加快，是连接“水质-生理-行为”的敏感中间量。在 2D 视频中可通过鳃盖区域的时序运动分析估计，本系统将其列为可扩展的生理观测项。", "refs": ["S22", "S9"]}, {"id": "QA-023", "cat": "行为与生理", "q": "体表黏液变化说明什么？", "a": "黏液是鱼体第一道免疫屏障；应激、寄生虫与水质恶化都会引起黏液分泌异常（过多呈浑浊白膜或过少显粗糙）。体表观察属于人工巡检项目，可与视频行为指标互证，在图谱中与寄生虫病、水霉病关联。", "refs": ["S9"]}, {"id": "QA-024", "cat": "行为与生理", "q": "拒食或减食说明什么问题？", "a": "摄食意愿骤降是敏感的早期信号，可能原因排序：水质恶化（氨氮/亚硝酸盐/pH）→ 应激（惊扰、天气剧变）→ 疾病（肠炎、寄生虫）。系统联动动作：投饵调节预案（减量控频）+ 排查水质，持续 2 天以上建议镜检。", "refs": ["S14", "S9"]}, {"id": "QA-025", "cat": "行为与生理", "q": "擦底蹭壁是什么行为的信号？", "a": "鱼体侧倾刮擦池底/池壁，是寄生虫（指环虫、小瓜虫等）或鳃部不适的典型指示行为。识别特征为短暂贴底伴侧倾刮擦。系统联动：镜检确诊 + 虫害防治预案（对症药浴、紫外消毒、换水）。", "refs": ["S9", "S14"]}, {"id": "QA-026", "cat": "行为与生理", "q": "伏底静止说明什么？", "a": "健康鱼群不会长时间贴底静止。伏底伴活动量骤减的排查方向：中毒（氨氮/硫化氢/药物）→ 疾病（肠炎、水霉）→ 底层缺氧。伏底与浮头不同：浮头指向表层缺氧，伏底多指向中毒或病害，处置路径完全不同。", "refs": ["S9", "S14"]}, {"id": "QA-027", "cat": "行为与生理", "q": "跳塘是什么现象？", "a": "鱼跃出水面，多发生在严重应激或水质剧变时，被视为泛塘前兆之一（危急级）。机理与低氧、中毒导致的神经刺激相关。处置：立即增氧、全面水质检测。", "refs": ["S9"]}, {"id": "QA-028", "cat": "疾病与风险", "q": "氨氮中毒的症状和处置？", "a": "症状：鳃丝暗红、游动迟缓、体表黏液异常，常伴伏底。阈值：总氨氮 >1.2 mg/L 或非离子氨 >0.02 mg/L（GB 11607-89）即为中毒风险。处置：加大换水稀释（10%～20%）+ 底排污协同降解 + 停喂减负（减少蛋白输入），同步监测 pH（高 pH 放大毒性）。", "refs": ["S6", "S9"]}, {"id": "QA-029", "cat": "疾病与风险", "q": "烂鳃病怎么识别和处置？", "a": "细菌性烂鳃：鳃丝溃烂、充血，呼吸困难引发浮头（鳃损伤使摄氧能力下降），高温季高发。识别线索：浮头但 DO 实测并不低——这是“行为与水质背离”的典型场景，正是多模态交叉验证的价值所在。处置：紫外消毒 + 改善水质 + 对症处理，执行病害处置预案。", "refs": ["S9"]}, {"id": "QA-030", "cat": "疾病与风险", "q": "肠炎病有什么表现？", "a": "细菌性肠炎：食欲废绝（拒食）、肛门红肿、伏底不食。与水质型拒食的区分点：伴随便 symptoms 与肛门红肿。处置：停喂 + 内服药物（遵医嘱）+ 水质改善；本图谱联动病害处置预案（预案G）。", "refs": ["S9"]}, {"id": "QA-031", "cat": "疾病与风险", "q": "水霉病什么时候高发？", "a": "真菌性水霉病：体表白毛絮状物，低温季（<18 ℃）与鱼体受伤后高发。处置：升温 + 盐浴 + 紫外消毒，执行病害处置预案。防逆温保氧预案（预案C+）同时覆盖低温风险。", "refs": ["S9"]}, {"id": "QA-032", "cat": "疾病与风险", "q": "寄生虫病怎么发现？", "a": "视觉线索：擦底蹭壁、躁动不安、鳃盖开合异常。确诊依赖镜检（鳃丝与体表黏液涂片）。高发于春秋水温过渡季。处置路径：镜检确诊 → 对症药浴 → 水体消毒（预案H），并排查引进水源与密度应激。", "refs": ["S9", "S14"]}, {"id": "QA-033", "cat": "疾病与风险", "q": "倒藻是什么？为什么危险？", "a": "藻类短期内大量死亡：产氧骤停 + 尸体分解耗氧 + 部分藻类释放毒素，三重打击可在数小时内把 DO 拉入危急区。诱因：水温突变、营养失衡、用药过激。防控：控制 TN/TP、监测水色与浊度、避免盲目杀藻。", "refs": ["S9"]}, {"id": "QA-034", "cat": "疾病与风险", "q": "疾病爆发和水质有什么关系？", "a": "应激与水质恶化是疾病爆发的两大前置条件：应激降低免疫力，恶化水体滋养病原。烂鳃、肠炎、水霉、寄生虫在图谱中均以 IS_A 关系挂接“疾病爆发”，且与水质恶化构成 LEADS_TO/INFLUENCES 链——水质管理即最基础的车间防疫。", "refs": ["S9"]}, {"id": "QA-035", "cat": "疾病与风险", "q": "人为惊扰（捕捞、噪音）影响有多大？", "a": "引发瞬时应激：急转、聚集、狂游，通常数分钟内消退。对系统的意义：惊扰会造成极化度骤降的“假警报”，本系统通过时间窗持续性与多指标（游速、NND、水质无异常）联合判定来区分真实应激与惊扰瞬态。", "refs": ["S5"]}, {"id": "QA-036", "cat": "疾病与风险", "q": "投喂过量有什么连锁后果？", "a": "残饵 → BOD 升高（偷氧）→ 氨氮升高 → 底泥淤积（硫化氢温床）→ 富营养化。整条链路在图谱中由“投喂负荷”实体串接。防控核心是按摄食状态调节投喂（投饵调节预案），“八成饱”原则兼顾生长与水质。", "refs": ["S9"]}, {"id": "QA-037", "cat": "疾病与风险", "q": "藻类过度增殖（水华）要处理吗？", "a": "要。水华白天产氧但夜间耗氧、pH 剧烈波动，且埋下倒藻隐患。识别：水色浓绿、浊度上升、pH 日差>1。处置：过滤除藻 + 紫外抑藻 + 控源（减少投喂负荷与外源营养盐），避免使用杀藻药引发倒藻。", "refs": ["S9"]}, {"id": "QA-038", "cat": "疾病与风险", "q": "水质恶化的综合判据是什么？", "a": "单指标超标即可预警，综合判据为“多指标同时越限”：DO 低位 + 氨氮超标 + 浊度/COD 上升 + 行为异常。本系统融合风险指数即为此设计：R = 0.35·溶氧风险 + 0.40·行为风险 + 0.25·氨氮风险，R≥0.5 触发预警级响应。", "refs": ["S9"]}, {"id": "QA-039", "cat": "养殖系统与品种", "q": "工厂化循环水（RAS）系统适合本系统吗？", "a": "适合且匹配度最高。RAS 水体小、可控性强、生物滤池承担硝化功能，水质突变主要来自投喂与设备故障，时间尺度短、行为响应明显；且 RAS 普遍已配备视频与基础传感，接入成本低。注意：RAS 中 DO 由曝气设备保障，图谱中的微孔曝气盘即对应此场景。", "refs": ["S9"]}, {"id": "QA-040", "cat": "养殖系统与品种", "q": "土塘养殖有什么特殊性？", "a": "土塘水体大、藻类主导溶氧日变化、底泥耗氧占比高，泛塘风险显著高于 RAS。分层（温跃层）使底部缺氧隐蔽性强——本图谱的“水体分层/逆温/池底淤泥”实体链即针对土塘场景。行为观测建议采用水面固定机位覆盖投饵区。", "refs": ["S9"]}, {"id": "QA-041", "cat": "养殖系统与品种", "q": "网箱养殖能用这套系统吗？", "a": "可以。网箱直接交换大水体，DO 通常充足，风险主要来自水流骤停、藻华过境与高密度应激。行为基线受水流影响明显，需要以“水流状态”作为环境协变量重新标定极化度与游速阈值。", "refs": ["S9"]}, {"id": "QA-042", "cat": "养殖系统与品种", "q": "不同品种的行为基线一样吗？", "a": "不一样，这是阈值本地化的核心原因。鲫鱼（Carassius）耐低氧较强、群体较稳；草鱼（Ctenopharyngodon）游速快、极化度基线偏高；鲈鱼/鳜鱼等肉食性种类应激反应剧烈；鲑鳟类对水温与 DO 要求苛刻（冷水种 DO 需求更高）。系统按品种配置基线参数，而非一套阈值通吃。", "refs": ["S9", "S14"]}, {"id": "QA-043", "cat": "养殖系统与品种", "q": "鲫鱼有什么养殖特点？", "a": "鲫鱼耐低氧与耐污能力较强，群游稳定、极化度基线高，是行为识别研究常用的模式品种之一。风险点：高温季仍会浮头，寄生虫（如指环虫）发生率较高。", "refs": ["S9", "S14"]}, {"id": "QA-044", "cat": "养殖系统与品种", "q": "草鱼的行为监测要注意什么？", "a": "草鱼游速快、活动性强，抢食激烈，极化度基线与游速上限需按草鱼重新标定；草食性，投喂负荷控制（纤维类饵料、按需投喂）是水质管理主线。", "refs": ["S9"]}, {"id": "QA-045", "cat": "养殖系统与品种", "q": "鲑鳟类（三文鱼）等冷水鱼适用吗？", "a": "适用但阈值体系不同：冷水种需更高 DO（低温下代谢与携氧特性不同）、对水温上限敏感（>20 ℃ 即应激）。系统框架不变，阈值集整体替换为冷水种参数集，并强化水温监控权重。", "refs": ["S9"]}, {"id": "QA-046", "cat": "养殖系统与品种", "q": "混养模式下行为识别会失效吗？", "a": "会有挑战：不同品种体型、游速、群体结构不同，检测与跟踪的 ID 保持难度上升。可行路径：按体型分档分别统计群体特征，或以优势品种为主体建模。这属于系统扩展方向，当前版本以单品种群体为设计目标。", "refs": ["S13", "S14"]}, {"id": "QA-047", "cat": "养殖系统与品种", "q": "不同生长阶段（鱼苗/成鱼）要调整什么？", "a": "鱼苗群体小、个体小、游速快且更敏感，NND 与游速基线完全不同；成鱼群体大、代谢负荷高。建议按“品种×密度×生长阶段”三元组维护基线参数集，系统支持参数集切换。", "refs": ["S9"]}, {"id": "QA-048", "cat": "视觉感知技术", "q": "为什么选 YOLOv8 做检测？", "a": "三个理由：实时性好（单阶段检测，满足 30 fps 视频流处理）；开源生态成熟（Ultralytics，便于微调与部署）；在水下目标检测任务中表现稳定。本系统采用轻量版 YOLOv8n，兼顾边缘算力。", "refs": ["S10"]}, {"id": "QA-049", "cat": "视觉感知技术", "q": "为什么用 BoT-SORT 做跟踪？", "a": "行为指标（极化度、NND）依赖“同一尾鱼”的连续轨迹，ID 切换会引入虚假突变。BoT-SORT 是轻量级强鲁棒多目标跟踪器，在密集交叉与遮挡场景下 ID 保持能力优于传统方法，适合鱼群高重叠场景。", "refs": ["S11"]}, {"id": "QA-050", "cat": "视觉感知技术", "q": "水下成像有什么难点？系统怎么应对？", "a": "难点：光吸收与散射导致色偏与低对比、悬浮物遮挡、气泡与反光干扰、鱼群相互重叠。应对：检测模型在水下数据上微调；群体级统计特征（P、NND）对个别帧的检测误差天然鲁棒；时间窗聚合进一步平滑单帧噪声。", "refs": ["S13", "S14"]}, {"id": "QA-051", "cat": "视觉感知技术", "q": "夜间或光照不足怎么办？", "a": "行为监测建议配置补光灯（图谱中的趋光聚集行为提示鱼对光有趋性，宜用低扰动照明）。若完全无光照，视觉模态退化，系统自动提高水质模态权重——这正是跨模态融合设计的意义：单模态盲区由另一模态补位。", "refs": ["S14"]}, {"id": "QA-052", "cat": "视觉感知技术", "q": "Fish4Knowledge 是什么数据集？", "a": "爱丁堡大学等机构构建的开放水下视频数据集与研究框架，包含长期海底观测视频与鱼类检测/分类标注，是本系统视觉数据与行为片段的来源之一。", "refs": ["S12"]}, {"id": "QA-053", "cat": "视觉感知技术", "q": "为什么用 30 fps？更低帧率行不行？", "a": "30 fps 保证快速游动目标的轨迹连续性（每帧位移可控），是极化度与急转频率计算的前提。巡游类行为 10～15 fps 也可估计，但抢食/狂游等高速场景需要 30 fps；本系统按 30 fps 设计并留有降帧接口。", "refs": ["S13"]}, {"id": "QA-054", "cat": "视觉感知技术", "q": "检测目标数为什么是 18 尾？", "a": "18 尾是原型系统的仿真设定，用于保证群体统计特征的方差可控（群体特征需要足够的个体数才有统计意义）。实际部署时目标数由检测器自适应输出，群体特征自动按实际 N 归一化。", "refs": ["S13"]}, {"id": "QA-055", "cat": "视觉感知技术", "q": "鱼群互相遮挡严重时指标还可信吗？", "a": "部分可信：极化度基于方向向量平均，个别个体的漏检/混 ID 对均值影响被 1/N 稀释；NND 受最近邻检测完整性影响较大。系统通过轨迹平滑与时间窗中位数统计抑制遮挡噪声；极端遮挡时段标记为低置信度。", "refs": ["S11", "S13"]}, {"id": "QA-056", "cat": "视觉感知技术", "q": "行为类别有哪些？怎么划分的？", "a": "十类：正常巡游、集群游动、浮头、狂游散乱、摄食抢食、跳塘、伏底静止、趋光聚集、拒食减食、擦底蹭壁。划分依据：行为学经典分类 + 养殖工艺中的管理含义（每类行为都挂接预案或排查动作，而非为分类而分类）。", "refs": ["S14", "S9"]}, {"id": "QA-057", "cat": "视觉感知技术", "q": "视觉特征怎么变成网络输入？", "a": "轨迹序列 → 群体运动学特征（P、游速、NND、目标数、急转频率）→ 时间窗统计量（均值/方差/变化率）→ 经 MLP 投影为视觉特征序列，作为跨模态注意力的 Query 输入。特征选择全部有行为学或工程学依据。", "refs": ["S1", "S15"]}, {"id": "QA-058", "cat": "视觉感知技术", "q": "摄像头怎么布设？", "a": "水面固定机位、覆盖投饵区与开阔游动区，1080p/30 fps 即可满足群体特征估计；避免水面反光角度，夜间配低扰动补光。系统不要求水下相机——群体级行为在侧视或俯视 2D 视场中均可估计。", "refs": ["S12", "S13"]}, {"id": "QA-059", "cat": "融合与预测", "q": "为什么要用跨模态注意力而不是简单拼接？", "a": "30 fps 视觉特征与 1 次/min 水质特征频率相差三个数量级，简单拼接会让低频特征被大量重复填充、高频局部异常被平均稀释（特征淹没）。跨模态注意力让每个视觉时刻对每个水质时刻计算关联权重，实现逐对（pairwise）深度交互，这是消除语义鸿沟的关键设计。", "refs": ["S15", "S17"]}, {"id": "QA-060", "cat": "融合与预测", "q": "Attention 公式里的 Q、K、V 分别是什么？", "a": "Attention(Qv,Ks,Vs)=softmax(QvKsᵀ/√dk)Vs。Qv：视觉行为特征（查询方，我们想知道“此刻行为异常与环境哪段有关”）；Ks/Vs：水质时序特征（被检索的环境上下文）；dk 为缩放因子防止点积过大导致 softmax 梯度消失。权重热力图 6×6 即 Q 帧与 K 样本的关联强度。", "refs": ["S15"]}, {"id": "QA-061", "cat": "融合与预测", "q": "这个融合机制举个直观例子？", "a": "当氨氮浓度瞬时飙升（低频突变）时，融合网络会在数学上自动放大鱼群在对应时间窗内极化度骤降帧的注意力权重——“环境异常”与“行为应激”相互印证，预警置信度提升。这就是摘要中所说的底层非线性语义对齐。", "refs": ["S15", "S17"]}, {"id": "QA-062", "cat": "融合与预测", "q": "单模态失效时会怎样？", "a": "注意力机制天然支持软退化：夜间视觉失效时，水质模态的 Key/Value 仍完整，风险指数主要由溶氧/氨氮分量支撑；水质传感器故障时，行为突变分量独立报警。系统以“模态可用性”动态重加权，避免单点盲区。", "refs": ["S17"]}, {"id": "QA-063", "cat": "融合与预测", "q": "融合风险指数是怎么构成的？", "a": "R = 0.35·溶氧风险 + 0.40·行为风险 + 0.25·氨氮风险，各分量为对应指标越限程度的归一化函数，R∈[0,1]。行为风险权重最高（0.40），因为行为是水质与生理状态的最终出口，也是本系统区别于纯水质监测的核心信号。", "refs": ["S9", "S15"]}, {"id": "QA-064", "cat": "融合与预测", "q": "四级预警的阈值依据是什么？", "a": "安全 R<0.25 / 注意 <0.5 / 预警 <0.75 / 危急 ≥0.75。阈值设计对应差异化响应成本：安全态低耗运行、注意态加密采样、预警态执行预案、危急态全功率应急。四级划分与养殖管理的“观察-复核-处置-应急”流程一一对应，避免过度响应。", "refs": ["S9"]}, {"id": "QA-065", "cat": "融合与预测", "q": "DO 趋势预测是怎么做的？", "a": "基于 DO 动力学机理（式 3-1）确定性外推未来 10 min，并叠加随时间增长的不确定度包络。机理外推的优势是可解释、外推稳定；真实系统中可与数据驱动的时序模型（如 Transformer 多尺度注意力水质预测）并联融合，机理保底、数据修正。", "refs": ["S16", "S7"]}, {"id": "QA-066", "cat": "融合与预测", "q": "为什么强调召回率而不是准确率？", "a": "预警场景的代价不对称：漏报（泛塘损失）远比误报（多开一次增氧机）昂贵。因此评价指标以召回率为先，配合准确率与 F1 防止过度报警。注意力融合的设计目标即“在环境-行为交叉确认时提升召回”。", "refs": ["S17"]}, {"id": "QA-067", "cat": "融合与预测", "q": "时间窗对齐具体怎么实现？", "a": "以分钟为窗口：窗口内 1800 帧视觉特征聚合为统计量（均值/方差/变化率），与该分钟末的传感读数构成对齐样本。窗口大小权衡灵敏与稳定：窗口过小则传感更新滞后引入错位，过大则抹平瞬态异常。当前取 1 min，与传感采样率一致。", "refs": ["S17"]}, {"id": "QA-068", "cat": "融合与预测", "q": "模型训练用什么框架和数据划分？", "a": "PyTorch 实现；数据按场景分层抽样划分训练/验证/测试集，同一视频片段的相邻窗口不跨集（防泄漏）。训练细节（优化器、学习率、早停）随代码库发布，保证可复现。", "refs": ["S15", "S16"]}, {"id": "QA-069", "cat": "融合与预测", "q": "注意力热力图怎么看？", "a": "行为为行（t-5…t0）、水质为列（s-5…s0）。正常态权重近似均匀；异常时出现亮斑——行指示“哪几帧行为异常”，列指示“与哪个环境样本关联”，亮斑行列交叉即异常焦点，用于解释“为什么报警”。", "refs": ["S15"]}, {"id": "QA-070", "cat": "决策与图谱", "q": "RAG 是什么？为什么用它做决策？", "a": "RAG（检索增强生成）：先从外部知识库检索与当前态势相关的强约束规则，再把这些规则注入 LLM 提示词，让模型在给定知识范围内生成回答。好处：决策有据可查、可更新知识而不重训模型、显著抑制幻觉（Lewis 2020）。", "refs": ["S19"]}, {"id": "QA-071", "cat": "决策与图谱", "q": "为什么不用 IF-THEN 规则库？", "a": "纯规则库死板且易冲突：条件组合爆炸、边界情形互相矛盾、无法用自然语言解释处置理由。本系统保留规则的“强约束”地位（图谱中的条件-预案-设备三元组），但把“组合、排序、表述”交给 LLM——规则确定底线，语言负责可读。", "refs": ["S19", "S20"]}, {"id": "QA-072", "cat": "决策与图谱", "q": "为什么不用强化学习（DQN）直接控制设备？", "a": "水产环境缺乏高保真仿真环境，RL 试错学习等于拿真实鱼群做实验，一次错误动作即可能造成生态灾难。RAG 方案的每个动作都能回溯到图谱规则与文献依据，风险可控且可审计——这是本系统“虚拟决策”定位的核心考量。", "refs": ["S19", "S21"]}, {"id": "QA-073", "cat": "决策与图谱", "q": "知识图谱里到底存了什么？", "a": "113 个实体（水质指标 14、环境条件 10、鱼群行为 10、风险事件 12、监测算法 14、特征指标 9、调控预案 13、设备实体 14、知识决策 10、成果产出 7）、230 条关系（触发/依赖/产出/影响/启用/抑制等 13 种语义），每条关系带触发条件与机理说明，关键实体带阈值/公式属性与文献依据标签。", "refs": ["S6", "S9"]}, {"id": "QA-074", "cat": "决策与图谱", "q": "图谱知识从哪里来？可靠吗？", "a": "三个来源：①国家标准（GB 11607-89 渔业水质标准）；②权威教材（《养殖水环境化学》）；③同行评审文献与权威推广指南（Kramer 1987、UF/IFAS、SRAC 等）。每条知识标注出处标签（S1~S23），实现“本体—属性—依据”三级可追溯。", "refs": ["S6", "S9"]}, {"id": "QA-075", "cat": "决策与图谱", "q": "余弦相似度检索是怎么工作的？", "a": "态势被编码为查询向量 q，与图谱每个实体的嵌入向量 dᵢ 计算余弦相似度 sim(q,dᵢ)=q·dᵢ/(‖q‖‖dᵢ‖)，取 Top-3 作为约束上下文。实测以“高密度缺氧浮头”查询：水体分层 0.738、低氧增氧 0.697、昼夜节律 0.693——机理、预案、时段三类知识均被召回。", "refs": ["S19"]}, {"id": "QA-076", "cat": "决策与图谱", "q": "实体嵌入向量怎么来的？", "a": "当前采用可复现的哈希词袋嵌入：对实体名称+描述+属性做字符 bigram 哈希到 64 维并归一化。优点是离线零依赖、确定可复现；生产环境可替换为预训练语义模型（如 BGE），向量索引结构不变。", "refs": ["S19"]}, {"id": "QA-077", "cat": "决策与图谱", "q": "Neo4j 在系统里承担什么角色？", "a": "知识图谱的存储与检索引擎：实体-关系以属性图模型存储，建立唯一性约束、全文索引（关键词检索）与向量索引（余弦 Top-K）。已导入本机 Neo4j Desktop 的 fishkg 库（113 实体/230 关系实测验证）。", "refs": ["S19", "S20"]}, {"id": "QA-078", "cat": "决策与图谱", "q": "什么是知识护栏（Guardrails）？", "a": "把图谱规则作为硬约束注入提示词：LLM 只负责组织语言与组合表述，调控动作本身必须来自检索到的规则集合。任何与规则冲突的生成内容被模板过滤。这使输出“零幻觉、可审计”——每条建议都能回溯到 S 标签出处。", "refs": ["S19", "S20"]}, {"id": "QA-079", "cat": "决策与图谱", "q": "调控日志里有什么内容？", "a": "每条记录含时间戳、来源标签（态势感知/跨模态融合/图谱检索/LLM 决策）与正文。例如危急态势输出：“判定危急态势：①全功率增氧②暂停投喂③应急换水 20%④通知管理人员”。日志支持一键导出归档，满足生产留痕要求。", "refs": ["S20", "S21"]}, {"id": "QA-080", "cat": "决策与图谱", "q": "用的哪个大模型？为什么 4 bit 量化？", "a": "Llama-3/Qwen 系列本地量化版（INT4）。量化把显存需求压缩约 4 倍，使 16 GB 级消费 GPU 即可本地离线推理；决策生成是低频、短文本任务，INT4 精度损失可接受。本地部署保证数据不出场、断网可用。", "refs": ["S21"]}, {"id": "QA-081", "cat": "决策与图谱", "q": "检索错了怎么办？会不会给错误建议？", "a": "三重防线：①检索 Top-3 而非 Top-1，冗余覆盖；②规则带触发条件，LLM 提示词要求条件不满足的预案不得引用；③分级预警约束动作上限（注意级不得输出应急动作）。此外日志人工可复核，最终决策权始终在管理者。", "refs": ["S20"]}, {"id": "QA-082", "cat": "决策与图谱", "q": "知识图谱怎么更新维护？", "a": "改数据源文件（kg_v3_data.py）→ 运行 build_v3.py 重新校验生成 → 运行 import_neo4j.py 重导。全流程幂等且自动校验 ID 唯一性/边端点/重复关系/孤立节点。新增实体建议同步补充文献标签。", "refs": ["S6", "S9"]}, {"id": "QA-083", "cat": "决策与图谱", "q": "农业领域有类似的 RAG+图谱实践吗？", "a": "有。ShizishanGPT（2024）将 RAG 与农业知识图谱结合做农事问答；KG2RAG（NAACL 2025）证明图谱引导检索能显著提升事实性。本系统把这一范式移植到水产调控这一高风险、强约束场景，并强调动作级（而非问答级）输出。", "refs": ["S20", "S21"]}, {"id": "QA-084", "cat": "预案与设备", "q": "系统联动哪些设备？", "a": "六类：叶轮增氧机（主增氧，3 kW/3.2 kgO₂·h⁻¹）、备用增氧机（危急双机联动）、微孔曝气盘（底部均匀增氧）、换水泵与排污泵（稀释与底排污）、投喂机（减量/停喂控制）、循环降温机组（控温）。紫外消毒器与过滤器服务病害处置。", "refs": ["S9", "S23"]}, {"id": "QA-085", "cat": "预案与设备", "q": "低氧增氧预案（A）的执行参数？", "a": "触发：DO<2.5 mg/L；目标：DO≥4 mg/L；响应时限 ≤5 min；执行：叶轮增氧机+微孔曝气。工程依据：叶轮式增氧机在 DO≈2 mg/L 时增氧能力约 1.5～2.5 lb O₂/hp（SRAC 3700），浅塘混合效果好；深水场景配微孔曝气提高 transfer 效率。", "refs": ["S23"]}, {"id": "QA-086", "cat": "预案与设备", "q": "危急时为什么要主+备双机全开？", "a": "危急（DO<1.5 mg/L）时增氧需求超出单机能力且时间窗口极短；增氧设备同时承担水体混合功能（打破分层）。备用机是“故障冗余”设计：主设备故障时系统仍保有应急能力——这是设备实体的联动逻辑来源。", "refs": ["S23"]}, {"id": "QA-087", "cat": "预案与设备", "q": "停喂减负为什么能缓解缺氧？", "a": "投喂后鱼类消化代谢耗氧显著上升（特殊动力作用），残饵分解继续耗氧。停喂直接削减 Rfish 与 BOD 两项耗氧源，是零成本的快速减负手段，常与增氧并行（预案 A+D 组合）。", "refs": ["S9"]}, {"id": "QA-088", "cat": "预案与设备", "q": "换水 10%~20% 的依据？", "a": "换水直接稀释氨氮/亚硝酸盐等溶解性废物，10%～20% 的单次换水量在应急与水体稳定间平衡：过大引发温盐冲击与应激，过小稀释不足。图谱中换水与排污泵联动（底排污协同清除氨源）。", "refs": ["S9"]}, {"id": "QA-089", "cat": "预案与设备", "q": "应激停喂预案（D）和停喂减负有什么区别？", "a": "停喂减负（预案D）由“DO<3.5 且浮头”触发，目标是降耗氧保命；应激停喂（预案D扩展）由“P<0.35+游速激增”触发，目标是停止投喂刺激、辅助增氧稳定鱼群。两者可并行，系统按 Top-K 排序合并执行。", "refs": ["S9"]}, {"id": "QA-090", "cat": "预案与设备", "q": "投饵调节预案的依据是什么？", "a": "按“摄食状态+水质负荷”双因子调节：抢食正常按计划投喂；拒食/水质负荷高时减量控频。这是最经济的源头管控——减少输入性污染永远优于末端处理。", "refs": ["S9"]}, {"id": "QA-091", "cat": "预案与设备", "q": "分级预警后人工要做什么？", "a": "注意级：加密巡塘与采样（1 次/10min），核对系统判断；预警级：确认预案执行、20 min 后复测回写；危急级：现场核查设备运行、评估分塘/转移需求。系统定位为决策支持，最终处置权在管理者。", "refs": ["S9"]}, {"id": "QA-092", "cat": "预案与设备", "q": "叶轮式和微孔曝气怎么选？", "a": "浅塘（<1 m）与需要水平混合的场景叶轮占优、应急可见性强；深水与高密度集约场景微孔曝气传氧效率更高。工程实践常用混合策略：微孔做日常基础增氧、叶轮做应急与混合。", "refs": ["S23"]}, {"id": "QA-093", "cat": "预案与设备", "q": "防逆温保氧预案什么时候启用？", "a": "T<18 ℃ 或暴雨预报时预防性启用：保温+增氧，防止表层降温形成密度分层阻断氧交换。事后处置（分层已形成）成本远高于预防，这是预案体系“预防优先”设计思想的体现。", "refs": ["S9"]}, {"id": "QA-094", "cat": "数据与仿真", "q": "为什么不采集真实传感器数据？", "a": "三个原因：实地传感矩阵与水下摄像成本数万元起，超出项目预算；极端水质场景（致死阈值附近）无法在真实塘口道德地复现——这正是预警算法最需要的数据；物理方程生成的数据标签具备物理一致性，是零噪声基准。真实小规模校准数据列为后续工作。", "refs": ["S12", "S7"]}, {"id": "QA-095", "cat": "数据与仿真", "q": "DO 仿真公式怎么理解？", "a": "DO(t) = DOsat(T) − ∫[Rfish(W,T) + kBOD·BOD − Ka(DOsat−DO)]dτ + ε(t)：饱和值扣掉鱼群呼吸耗氧与底泥/残饵生化耗氧，加上大气复氧回报，再加高斯噪声 ε(t)~N(0,σ²) 模拟廉价传感器误差。每项都有明确物理含义，保证仿真数据的机理可信度。", "refs": ["S7", "S9"]}, {"id": "QA-096", "cat": "数据与仿真", "q": "行为视频和仿真数据怎么对齐？", "a": "以行为标签为锚：视频片段标为“缺氧浮头”，则该时段按浮头场景参数（DO 衰减曲线+行为强度因子 αbeh）生成传感序列，时间戳逐分钟对齐。物理逻辑：剧烈行为 → 呼吸耗氧因子增大 → DO 下降加快，与画面同步。", "refs": ["S12"]}, {"id": "QA-097", "cat": "数据与仿真", "q": "数据集规模多大？怎么划分？", "a": "规划 ≥10 万帧标注对齐数据，四类场景各约 2.5 万帧；同时对 T/W/BOD/Ka 参数扫掠覆盖不同养殖工艺。划分按场景分层抽样，同一视频片段相邻窗口不跨集，防止信息泄漏。", "refs": ["S12"]}, {"id": "QA-098", "cat": "数据与仿真", "q": "仿真数据的噪声项必要吗？", "a": "必要。纯净物理曲线会让模型过拟合“理想信号”，面对真实传感器的抖动、漂移与丢包时脆弱。高斯噪声模拟廉价 IoT 传感的测量误差，让模型从第一步就学习在噪声下决策。", "refs": ["S9"]}, {"id": "QA-099", "cat": "数据与仿真", "q": "数据长尾问题怎么解决？", "a": "极端场景（致死阈值、剧烈中毒）在自然界稀少，正是仿真范式的优势区域：参数推到极端即可批量生成。相比实地等待小概率事件，仿真把长尾变成了可采样的分布。", "refs": ["S12"]}, {"id": "QA-100", "cat": "数据与仿真", "q": "数据集会开源吗？", "a": "会。项目预期成果包含“物理仿真+真实行为视频对齐的多模态开源基准数据集（≥10 万帧）”与底层融合算法代码库，填补 AI+农业交叉领域的开源空白，随论文工作同步发布。", "refs": ["S12", "S14"]}, {"id": "QA-101", "cat": "数据与仿真", "q": "仿真和真实数据的差距（sim-to-real）怎么处理？", "a": "诚实地说存在差距：真实传感器有漂移、生物污堵与非线性。计划用小规模真实采集数据做校准迁移（域自适应），并以行为视频这条真实模态锚定系统输出。这是论文讨论章节明确披露的局限。", "refs": ["S17"]}, {"id": "QA-102", "cat": "数据与仿真", "q": "标注是怎么做的？", "a": "视频行为标签来自开源数据集自带标注 + 人工复核（时间窗级别）；仿真传感数据由方程直接生成，天然带精确标签（生成即标注），无需人工打标——这是仿真范式的另一成本优势。", "refs": ["S12", "S14"]}, {"id": "QA-103", "cat": "数据与仿真", "q": "能不能只用真实视频不用仿真？", "a": "可以运行行为识别，但预警训练会缺“环境-行为对齐”的监督信号：视频只有行为标签，没有同步的精准水质真值。仿真的本质是补齐这条对齐链路；未来接入真实传感后，仿真退居数据增强角色。", "refs": ["S12"]}, {"id": "QA-104", "cat": "系统与部署", "q": "“零硬件依赖”是什么意思？", "a": "系统不要求用户部署任何专用传感或水下摄像：视频用普通监控（30 fps 即可），水质数据由物理仿真生成（真实场景可接任意标准水质传感器）。这把应用门槛从“数万元设备+施工”降到“一段已有视频流”。", "refs": ["S12", "S9"]}, {"id": "QA-105", "cat": "系统与部署", "q": "demo 怎么运行？", "a": "单文件 index.html，双击浏览器打开即可，完全离线（ECharts 已内联）。包含四场景切换、参数滑块、注意力热力图、趋势预测、知识图谱可视化与决策日志。无需安装任何环境。", "refs": ["S13"]}, {"id": "QA-106", "cat": "系统与部署", "q": "问答网站需要联网吗？", "a": "不需要。本问答站为纯静态单文件（数据内嵌），双击打开即用，也可推送到 GitHub Pages 在线访问——两种方式内容完全一致。", "refs": ["S13"]}, {"id": "QA-107", "cat": "系统与部署", "q": "Neo4j 是必需的吗？", "a": "网页版问答与 demo 不需要 Neo4j（数据内嵌）；完整决策链路的向量检索需要 Neo4j（已导入 fishkg 库）。两者可独立运行：演示用前者、生产链路用后者。", "refs": ["S19", "S20"]}, {"id": "QA-108", "cat": "系统与部署", "q": "能部署到边缘设备吗？", "a": "架构上已预留：YOLOv8n + 轻量跟踪器本身边缘可跑；融合网络经通道剪枝 + INT4 量化后可迁移；LLM 决策采用 4 bit 量化本地方案。目标平台为带 16 GB 级 GPU 的边缘工控机，纯 CPU 方案需进一步裁剪。", "refs": ["S13"]}, {"id": "QA-109", "cat": "系统与部署", "q": "系统的主要局限是什么？", "a": "四点：仿真-真实分布差异（sim-to-real gap）；二维视场遮挡影响个体级精度；知识图谱覆盖度决定决策边界（当前面向常见淡水品种）；哈希嵌入的语义能力弱于预训练模型。均在论文中如实披露，并给出对应的后续计划。", "refs": ["S17", "S13"]}, {"id": "QA-110", "cat": "系统与部署", "q": "和市面上的水质监测仪有什么区别？", "a": "水质监测仪只回答“水质现在如何”；本系统回答“鱼群状态如何、为什么、接下来怎么办”——增加了行为因果解释与处置级决策输出。且零硬件方案把成本从设备采购转移到算法订阅，商业模型完全不同。", "refs": ["S9", "S21"]}, {"id": "QA-111", "cat": "系统与部署", "q": "误报率怎么控制？", "a": "四重机制：多指标交叉确认（单一模态异常只进注意级）；时间窗持续性校验（惊扰瞬态不触发预案级）；分级动作上限（注意级不输出设备动作）；日志人工复核闭环。参数可按养殖场误报容忍度调节。", "refs": ["S17", "S9"]}, {"id": "QA-112", "cat": "系统与部署", "q": "数据安全怎么保证？", "a": "全链路本地化：视频不外传、LLM 本地量化推理、Neo4j 本地部署，无云端依赖。问答站与 demo 为纯静态文件，不含任何遥测。适合对生产数据敏感的养殖企业。", "refs": ["S21"]}, {"id": "QA-113", "cat": "水质与阈值", "q": "越冬期水质管理要注意什么？", "a": "越冬（水温<10 ℃）鱼类代谢与摄食大幅下降，但溶氧风险不降反升：冰盖或水温分层阻断复氧、光照弱光合产氧少。要点：越冬前全池消毒并补足肥度、保持水深（≥1.5 m 稳定水温）、控制越冬密度、定期打冰眼或增氧机间歇破冰、监测底层 DO。本系统防逆温保氧预案在越冬期应保持预防性运行。", "refs": ["S9"]}, {"id": "QA-114", "cat": "水质与阈值", "q": "养殖户自己怎么检测水质？", "a": "三级手段：①试纸/比色卡（几元一次，粗测 pH/氨氮/亚硝酸盐，适合日常快筛）；②液体试剂盒（比色读数，精度中等）；③电极法在线监测仪（连续、精准，本系统数据源口径）。建议日常用试剂盒每周 2 次 + 高危时段加密，关键指标以电极法为准。采样点应避开增氧机正下方与投饵区。", "refs": ["S9"]}, {"id": "QA-115", "cat": "水质与阈值", "q": "晴天中午为什么要开增氧机？", "a": "晴天午后表层 DO 常过饱和、底层仍低（光合产氧集中在上层）。晴天中午开增氧机 1～2 h 可搅水打破分层，把表层富氧水送到底层、把底层贫氧水与营养盐翻上来，是“储氧于水”的预防性措施——与应急增氧的目的完全不同，成本也更低。", "refs": ["S9"]}, {"id": "QA-116", "cat": "水质与阈值", "q": "下雨天要停喂吗？", "a": "建议减喂或停喂：雨天光照弱产氧下降、鱼摄食本就减弱，继续投喂既浪费饲料又推高 BOD。暴雨预警时执行防逆温保氧预案并停喂；雨后 1～2 天视水质恢复情况逐步复喂，先半量观察摄食响应。", "refs": ["S9"]}, {"id": "QA-117", "cat": "水质与阈值", "q": "底质改良怎么做？", "a": "底质是“隐形耗氧源”：淤泥过厚（>15 cm）显著推高 BOD 与硫化氢风险。措施：定期底排污、养殖间隙清淤晒塘、使用底质改良剂（过硫酸氢钾等氧化型制剂，遵产品说明）、避免残饵沉积。本图谱“池底淤泥→BOD/硫化氢”链条即此逻辑。", "refs": ["S9"]}, {"id": "QA-118", "cat": "行为与生理", "q": "水温与鱼类代谢是什么关系（Q10）？", "a": "鱼类是变温动物，代谢率随水温呈指数变化，常用 Q10 系数描述（每升温 10 ℃ 代谢约提高 1.5～2.5 倍，因种而异）。这意味着：水温 +5 ℃，呼吸耗氧可能接近翻倍——DOsat 却在下降。高温天“耗氧升、供氧降”的剪刀差是泛塘的核心数学结构。", "refs": ["S9"]}, {"id": "QA-119", "cat": "行为与生理", "q": "鱼群的摄食有昼夜节律吗？", "a": "有。多数温水性摄食性鱼类在清晨与傍晚形成摄食高峰，正午强光与深夜摄食减弱。投喂应贴合节律（日投 2～3 次位于节律峰），既提高饲料效率又便于以“抢食强度”作为健康观测窗口——节律紊乱本身就是异常信号。", "refs": ["S14", "S9"]}, {"id": "QA-120", "cat": "行为与生理", "q": "应激会在鱼群中“传染”吗？", "a": "会。鱼类的惊恐反应通过视觉（看见同伴逃窜）、化学信号（报警物质，损伤皮肤释放）在群体中快速传播，少数个体的应激可在数十秒内扩散为群体行为。这就是为什么系统用群体统计量（极化度/NND）而非单个体行为来判定应激。", "refs": ["S3", "S22"]}, {"id": "QA-121", "cat": "行为与生理", "q": "不同个体行为差异大吗？个体化监测可行吗？", "a": "同群内存在明显个体差异（摄食 aggressiveness、胆量、活动水平），2D 群体监测会把这些差异平均掉。个体级监测（身份识别+个体轨迹）技术上可行但算力与精度成本高，本系统定位群体级预警——群体指标恰恰是养殖决策（投喂、增氧）真正需要的粒度。", "refs": ["S1", "S13"]}, {"id": "QA-122", "cat": "行为与生理", "q": "怎么区分“正常集群”和“应激聚集”？", "a": "三要素区分：位置（正常集群散布全池，应激聚集贴水面/贴边）、动态（正常集群队形稳定游动，应激聚集伴乱窜或僵滞）、协变量（水质有无异常、有无投喂/惊扰事件）。系统以三要素联合打分，单一“聚集”不直接触发预警。", "refs": ["S3", "S14"]}, {"id": "QA-123", "cat": "疾病与风险", "q": "病害预防体系应该怎么做？", "a": "“防重于治”四道防线：①源头（苗种检疫、引种隔离观察 2 周）；②环境（水质管理即最基础防疫——本图谱水质-应激-疾病链）；③营养（优质饲料增强免疫）；④监测（行为+摄食早发现，镜检早确诊）。系统价值在第四道防线的自动化。", "refs": ["S9"]}, {"id": "QA-124", "cat": "疾病与风险", "q": "新进的鱼苗为什么要隔离检疫？", "a": "苗种携带病原（寄生虫、细菌、病毒）是病害传入的首要途径。隔离观察 2 周以上、单独水体养殖、工具专用、入池前药浴消毒，可拦截 80% 以上的外来病原引入风险。隔离池同样可纳入行为监测范围。", "refs": ["S9"]}, {"id": "QA-125", "cat": "疾病与风险", "q": "用药后为什么要执行休药期？", "a": "渔药（抗菌药、驱虫药）在鱼体内残留需要时间代谢排出，休药期内捕捞上市会造成食品安全风险，属违规行为。系统在病害处置预案中标注“用药严格执行休药期”，处置日志留痕可审计，就是为了堵住这个合规漏洞。", "refs": ["S9"]}, {"id": "QA-126", "cat": "疾病与风险", "q": "营养和免疫力有什么关系？", "a": "饲料蛋白/能量失衡、维生素（VC/VE）与微量元素缺乏都会显著降低免疫力和抗应激能力，“营养性应激”会放大水质应激。选择匹配品种与生长阶段的配方饲料、避免过期霉变饲料，是行为异常排查中“营养”方向的依据。", "refs": ["S9"]}, {"id": "QA-127", "cat": "养殖系统与品种", "q": "一个塘配几台增氧机怎么算？", "a": "工程经验法：按载鱼量配 0.3～0.5 kW/亩（高产塘取高值），或按水体 1000 m³ 配 1.5～3 kW；同时至少一备一用。增氧能力口径（如 3.2 kgO₂/h）应与高峰耗氧量（鱼载量×耗氧率+BOD）匹配并留 30% 余量。深夜与喂料后 1 h 是开启关键期。", "refs": ["S9", "S23"]}, {"id": "QA-128", "cat": "养殖系统与品种", "q": "循环水系统（RAS）要盯住哪些核心参数？", "a": "除 DO/氨氮/pH/温度外，RAS 特有：生物滤池工况（硝化效率，决定亚硝酸盐）、系统换水率（5%～10%/天）、固滤去污效率（TSS）、臭氧/紫外残留。RAS 水体小负荷大，参数恶化时间尺度短——恰恰适合本系统 1 次/min 级的监测预警密度。", "refs": ["S9"]}, {"id": "QA-129", "cat": "养殖系统与品种", "q": "水质传感器怎么选型？", "a": "选型四看：原理（DO 荧光法优于极谱法，免维护周期长）、精度与漂移（氨氮在线监测仍是难点，可用 TAN+pH+温度推算非离子氨替代直测）、维护成本（清洁刷/校准周期）、输出协议（RS485/4-20mA 接入系统）。建议双探头冗余，关键指标交叉验证。", "refs": ["S9"]}, {"id": "QA-130", "cat": "视觉感知技术", "q": "行为监测的视频拍摄有什么规范？", "a": "五条：①固定机位避免手持抖动；②覆盖投饵区与开阔游动区，避开增氧机水花；③俯视或侧视保持稳定视角；④保证光照（夜间低扰动补光）；⑤分辨率 1080p/30 fps 起步，镜头污堵（藻类附着）定期清洁。规范拍摄是视觉指标准确率的第一道保障。", "refs": ["S13", "S14"]}, {"id": "QA-131", "cat": "视觉感知技术", "q": "相机装多高、什么角度合适？", "a": "经验值：俯视安装距水面 1.5～3 m，视场覆盖 3 m×5 m 左右水面；角度尽量垂直以减小透视畸变（极化度/游速为平面向量，畸变会引入方向偏差）；侧视可补充水面行为（浮头）观察但个体重叠加重。多机位拼接是大面积池塘的扩展方向。", "refs": ["S13"]}, {"id": "QA-132", "cat": "视觉感知技术", "q": "视频标注规范是什么？", "a": "标注口径：时间窗级行为标签（一段视频一个主导行为）+ 帧级检测框（可选）。行为类目用图谱 10 类行为本体，边界情形（如浮头与趋光聚集同现）标注主导行为并记录协变量（光照/投喂）。双人背对背标注、分歧仲裁，保证标签一致性。", "refs": ["S12", "S14"]}, {"id": "QA-133", "cat": "视觉感知技术", "q": "想用自己的鱼塘视频训练模型，可行吗？", "a": "可行且推荐：以本系统开源框架为基座，采集本场视频 200～500 段（覆盖四类行为与光照/季节变化），按数据集规范标注后微调检测与分类模型。本地化训练能显著消除品种与场景偏差，是系统推广的标准路径。", "refs": ["S10", "S14"]}, {"id": "QA-134", "cat": "融合与预测", "q": "多头注意力是什么？和单头有什么区别？", "a": "多头=并行计算多组独立的 Q/K/V 投影，每组关注不同的关联模式（如一个头盯“溶氧骤降-狂游”、另一个头盯“氨氮-拒食”），最后拼接融合。单头只能表达一种对齐模式，多头让跨模态关联更丰富。实现上仅增加一组可学习投影，成本很低。", "refs": ["S15"]}, {"id": "QA-135", "cat": "融合与预测", "q": "两路模态特征量纲不同，怎么归一化？", "a": "各自独立标准化：视觉特征按训练集统计量做 z-score 或 min-max；水质特征同样处理后经 MLP 投影到统一隐藏维度。关键原则是归一化统计量只来自训练集并随模型发布，防止验证/推理阶段信息泄漏。", "refs": ["S17"]}, {"id": "QA-136", "cat": "融合与预测", "q": "怎么防止模型过拟合？", "a": "五招：数据增强（时间窗抖动、噪声注入——仿真管线天然支持）、Dropout 与权重衰减、早停（验证集指标平台即停）、消融对照（参数量对齐防止“参数多才赢”）、跨场景验证（训练与测试来自不同场景批次）。评测协议已把这几点写入。", "refs": ["S15", "S16"]}, {"id": "QA-137", "cat": "融合与预测", "q": "推理速度不够快怎么优化？", "a": "优先级：①输入侧降采样（视觉 30→15 fps、窗口聚合）；②模型剪枝（通道剪枝后微调恢复精度）；③量化（INT8/INT4，边缘 GPU/ NPU 支持）；④批量与流水线（检测-跟踪-融合三级流水重叠执行）。工程目标：单路 1080p 30fps 实时。", "refs": ["S13"]}, {"id": "QA-138", "cat": "决策与图谱", "q": "知识图谱的本体（Schema）是怎么设计的？", "a": "自顶向下+自底向上结合：先按养殖决策链确定主轴（水质→行为→预案→设备），再从标准/教材/文献抽取实体填充；每类实体定义属性口径（单位/阈值/公式），每种关系定义语义与方向。10 类实体 13 种关系经三轮专家校对定稿，后续扩充遵循同一 Schema。", "refs": ["S6", "S9"]}, {"id": "QA-139", "cat": "决策与图谱", "q": "实体属性的口径冲突了怎么办？", "a": "按权威等级裁决并保留注记：国标 > 教材 > 期刊综述 > 行业经验。例如 DO 下限以 GB 11607-89 为准，浮头行为阈值以 Kramer/IFAS 区间并注明“因种类而异”。冲突条目在数据源中以 refs 双标签标注，审查时可追溯。", "refs": ["S6", "S9"]}, {"id": "QA-140", "cat": "决策与图谱", "q": "图谱检索一个相关结果都没找到怎么办？", "a": "兜底策略：①降低相似度阈值并放宽到 Top-5；②回退到关键词全文检索；③仍无结果则输出“知识库未覆盖该态势”并给出通用安全动作（增氧+停喂+人工介入），同时把该查询记录为知识盲区——盲区清单是图谱扩充的需求来源。", "refs": ["S20"]}, {"id": "QA-141", "cat": "决策与图谱", "q": "大语言模型的 temperature 参数要调吗？", "a": "要，而且建议设为低值（0～0.3）：调控日志要求确定性、可复现，创造性采样反而是风险源。配合固定 Prompt 模板与 top-p 截断，同一态势多次生成的日志应基本一致——这也是日志可审计性的前提之一。", "refs": ["S19", "S21"]}, {"id": "QA-142", "cat": "决策与图谱", "q": "提示词（Prompt）模板里都有什么？", "a": "四段式：①角色与任务（你是水产养殖决策助手，基于给定知识生成日志）；②当前态势（DO/氨氮/极化度/风险等级等结构化数据）；③检索到的 Top-3 规则（条件—预案—设备三元组，硬约束）；④输出格式（日志字段、语气、禁止项）。模板版本化管理，改动留痕。", "refs": ["S19", "S20"]}, {"id": "QA-143", "cat": "预案与设备", "q": "应急预案的标准响应流程是什么？", "a": "五步闭环：①确认（系统危急报警 → 人工/视频复核）；②执行（按预案F：全功率增氧、停喂、应急换水）；③通报（通知值班与负责人）；④复测（每 10 min 一次 DO，回升 4 mg/L 稳定 2 h 方可降级）；⑤复盘（日志归档、根因分析、预案修订）。系统承担①②的自动化与④⑤的记录。", "refs": ["S9", "S23"]}, {"id": "QA-144", "cat": "预案与设备", "q": "预案需要演练吗？", "a": "需要。每季度至少一次桌面推演（模拟 DO 骤降场景，走一遍报警-复核-执行-复测流程）+ 一次实机演练（手动触发增氧设备验证响应时限 ≤5 min）。系统日志可作为演练考评的客观依据——响应时限是硬指标。", "refs": ["S23", "S9"]}, {"id": "QA-145", "cat": "预案与设备", "q": "增氧机日常维护保养做什么？", "a": "四查：查电机绝缘与接线（防水老化）、查叶轮/齿轮箱磨损与润滑（每季加油）、查曝气管路堵塞（微孔盘定期排污冲洗）、查浮筒完整性。停机期上岸保养入库存放。应急设备每月试机一次——预案可靠性取决于最不可靠的那台设备。", "refs": ["S23"]}, {"id": "QA-146", "cat": "数据与仿真", "q": "仿真模型里的参数（r0、kBOD、Ka）怎么确定？", "a": "三层来源：教材与文献的典型值区间（初值）；参数扫掠覆盖合理范围（保证多样性）；有真实数据的场景做反演辨识（最小化仿真曲线与实测曲线误差）。参数连同元数据随数据集发布，供使用者按本地条件调整。", "refs": ["S7", "S9"]}, {"id": "QA-147", "cat": "数据与仿真", "q": "数据集的版本怎么管理？", "a": "语义化版本+变更清单：vX.Y.Z 中 Z 变更（补样本/修标注）不改变划分协议，Y 变更（新增场景/品种）需重跑基线。每次发布附带 SHA-256 校验与生成参数快照，保证论文基准可复现、可追溯。", "refs": ["S12"]}, {"id": "QA-148", "cat": "系统与部署", "q": "网站对浏览器有什么要求？", "a": "推荐 Chrome/Edge 最新版（视频编解码与 Canvas 性能最好）；Firefox 可用；旧版 IE 不支持。手机浏览器可访问与检索，视频上传分析建议在桌面端进行（采样计算更流畅）。纯静态站点无需安装任何环境。", "refs": ["S13"]}, {"id": "QA-149", "cat": "系统与部署", "q": "手机上能用吗？", "a": "能。两个站点均为响应式布局：问答站与行为预测站在手机浏览器中可正常检索、查看与提交分析；视频分析在性能较弱的手机上采样帧数会自动减少（仍可用，速度略慢）。iOS 需注意视频文件格式（建议 mp4）。", "refs": ["S13"]}, {"id": "QA-150", "cat": "系统与部署", "q": "想在其基础上二次开发，从哪里入手？", "a": "三个入口：①问答数据：编辑 tools/qa_data_*.py 后运行 build_site.py 重建；②知识图谱：编辑 kg_v3_data.py → build_v3.py → import_neo4j.py；③预测逻辑：行为判定/预案规则集中在 index.html 的 KW/PLANS 常量与 infer() 函数，改完即生效（纯前端）。", "refs": ["S13"]}, {"id": "QA-151", "cat": "系统与部署", "q": "系统的预警能力和人工经验相比怎么样？", "a": "定位是互补而非替代：系统胜在 24 小时不间断、凌晨高危时段不掉线、多指标交叉不疲劳、决策留痕可复盘；人工胜在复杂病因的综合判断与处置灵活性。理想模式是“系统站岗+人工决断”，日志是两者协作的接口。", "refs": ["S14", "S9"]}, {"id": "QA-152", "cat": "系统与部署", "q": "项目的开源计划是什么？", "a": "三阶段：①结题即开源知识图谱数据与构建工具（本仓库）；②数据集定稿后开源对齐数据集与融合算法代码库（含评测基准）；③预测模型的预训练权重与微调脚本随论文发表同步开放。全部采用允许学术使用的开源协议。", "refs": ["S12", "S19"]}, {"id": "QA-193", "cat": "水质与阈值", "q": "怎么看水色判断水质？", "a": "看水色是养殖户的传统“传感器”：黄绿/翠绿带爽为佳；浓绿发黑→藻类过度增殖预警；澄清见底→肥度不足；红棕/酱油色→甲藻或倒藻前兆；白浊→浮游动物过量。水色突变（尤其转红转黑）应立即加密检测 DO 与 pH，并警惕倒藻。", "refs": ["S9"]}, {"id": "QA-154", "cat": "水质与阈值", "q": "透明度多少合适？怎么测？", "a": "用透明度盘（赛氏盘）测定：养殖期适宜 25～35 cm。>40 cm 说明水瘦（产氧不足），<20 cm 说明水过肥（夜间耗氧风险大）。测量在背光处垂直读数。透明度与本系统浊度指标互补：浊度看悬浮颗粒，透明度看藻类密度。", "refs": ["S9"]}, {"id": "QA-155", "cat": "水质与阈值", "q": "水质检测频率怎么安排合理？", "a": "常规：每天早晚各测一次 DO/水温（凌晨 4~6 时必测）；每 2~3 天测氨氮/亚硝酸盐/pH；每周一次 COD/总氮总磷。高危触发加密：闷热/暴雨/降温/用药后每 1~2 小时一次。本系统按 1 次/min 仿真采样，实际部署时传感频率可按此建议配置。", "refs": ["S9", "S6"]}, {"id": "QA-156", "cat": "水质与阈值", "q": "亚硝酸盐超标怎么处理最快？", "a": "紧急三步：①立即停喂（减少蛋白输入与耗氧）；②亚盐是硝化不畅的信号——增氧促进硝化、泼洒食盐（氯离子竞争性抑制亚盐吸收，浓度 3~5 kg/亩·米）；③换水 10%~20% 稀释。根治靠生物滤池成熟或硝化细菌补充，切忌大量使用消毒剂破坏硝化系统。", "refs": ["S9"]}, {"id": "QA-157", "cat": "水质与阈值", "q": "pH 偏高怎么调？偏低怎么调？", "a": "pH 偏高（>8.5，常因藻类过旺）：用腐殖酸钠/红糖+乳酸菌调水，控制藻类；切忌直接大量加酸。偏低（<6.5，常因底质酸化）：泼洒生石灰（每亩 5~10 kg，分次），并查底质。调 pH 幅度单次不超过 0.5，避免鱼体应激。", "refs": ["S9"]}, {"id": "QA-158", "cat": "水质与阈值", "q": "底排污多久排一次？", "a": "视投喂量与池型：循环水系统每日 1~2 次（喂料后 1 h 排污效率最高，残饵尚未分解）；土塘每周 1~2 次或配合增氧机集中排污。判断依据：排污口水质明显发黑发臭说明频次合适，清亮说明可延长间隔。本图谱“排污泵→硫化氢抑制”即此逻辑。", "refs": ["S9"]}, {"id": "QA-159", "cat": "行为与生理", "q": "鱼群行为有昼夜差异吗？", "a": "有：白天以巡游觅食为主、分布均匀；傍晚摄食高峰行为活跃；夜间活动减弱、下沉分散，凌晨若聚集水面即异常。系统判定行为时引入时段协变量——同样的聚集度，凌晨计为浮头嫌疑，白天投喂时段计为抢食。", "refs": ["S9", "S14"]}, {"id": "QA-160", "cat": "行为与生理", "q": "投喂前后行为基线会变吗？", "a": "会：投喂后 10~30 min 内游速升 2~3 倍、极化度因抢食发散下降 0.3~0.5、NND 收缩，均属正常。系统以“投喂状态”为协变量：投喂窗内的行为波动不触发应激预案，投喂窗外同等波动则判定异常。这也是自动投喂机联动的意义。", "refs": ["S14"]}, {"id": "QA-161", "cat": "行为与生理", "q": "鱼的行为和饲料系数有什么关系？", "a": "直接相关：摄食积极→饲料系数低；拒食或应激抢食→系数升高（能量浪费在应激与无效游动）。行为监测数据可作为饲料效率的代理指标——摄食响应时长与抢食强度的变化趋势，比定期称重更早提示饲料或健康问题。", "refs": ["S14", "S9"]}, {"id": "QA-162", "cat": "行为与生理", "q": "鱼群大小对行为指标有影响吗？", "a": "有：小群体（<5 尾）统计量方差大，单尾异常即可显著改变极化度；大群体（>50 尾）趋于稳定但个体分辨率下降。系统建议视场内维持 10~30 尾的观测规模：统计稳定且计算开销可控。目标数突变（死鱼逃逸）本身也是预警信号。", "refs": ["S1", "S13"]}, {"id": "QA-163", "cat": "行为与生理", "q": "行为指标有哪些局限？怎么弥补？", "a": "三点局限：①2D 投影丢失深度信息（上下重叠个体混淆）；②水面反光/水草干扰特征提取；③行为≠病因，只能提示方向不能确诊。弥补：多机位/侧视补位、稳定的拍摄规范、行为预警后必接人工镜检与水质复测。系统在说明中如实标注这些边界。", "refs": ["S13", "S14"]}, {"id": "QA-164", "cat": "疾病与风险", "q": "细菌性烂鳃和寄生虫烂鳃怎么区分？", "a": "都表现为摄食下降与浮头，区分点：细菌性——鳃丝溃烂发白、黏液多但无肉眼虫体，高发于高温季；寄生虫性——鳃盖张开“开天窗”、鱼躁动擦底，镜检可见虫体。处置完全不同：前者消毒抗菌，后者药浴杀虫。因此预案G与预案H是分开的两条路径。", "refs": ["S9"]}, {"id": "QA-165", "cat": "疾病与风险", "q": "肝胆综合征（花肝）是怎么回事？", "a": "高糖高脂饲料与投喂过量导致肝胆负担过重：肝色花斑、胆囊肿大，鱼体表现拒食、伏底、抗应激力差——行为上与水质型异常高度相似。鉴别要点：水质检测正常+持续拒食→优先怀疑肝胆问题。处置：减喂 30%~50%、换用保肝饲料、严禁继续加料催长。", "refs": ["S9"]}, {"id": "QA-166", "cat": "疾病与风险", "q": "气泡病是什么？怎么发生？", "a": "水体中气体过饱和（藻类暴晒产氧过盛或加气过猛）时，鱼体表/鳍条/鳃丝出现气泡，行为上表现游动失衡、侧翻、浮于水面但非缺氧型浮头。多发生在晴天午后小水体强光照场景。处置：立即遮光、加注新水、停止增氧，通常数小时缓解。", "refs": ["S9"]}, {"id": "QA-167", "cat": "疾病与风险", "q": "应激为什么会叠加？怎么防？", "a": "应激具有累加效应：水质应激+操作应激（拉网/转塘）+天气应激叠加后，皮质醇持续高位，免疫力断崖式下降，几天内即爆发病害。防范原则：避免多应激源同时出现——拉网前停喂一天、天气剧变期禁止转塘、转塘后执行应激停喂预案。", "refs": ["S5", "S22"]}, {"id": "QA-168", "cat": "疾病与风险", "q": "能不能给一份“异常早期信号清单”？", "a": "十条早期信号（按发现难度排序）：①摄食响应变慢；②抢食群体变小；③游速分布变宽；④个别鱼离群；⑤体色变暗；⑥浮头前后水面油膜增多；⑦水色突变；⑧夜间耗氧异常升高（增氧机开停时间提前）；⑨残饵增多；⑩极化度基线漂移。系统将①⑤⑨作为行为类信号自动捕捉，其余需人工巡检配合。", "refs": ["S14", "S9"]}, {"id": "QA-169", "cat": "养殖系统与品种", "q": "温棚/冬棚养殖需要注意什么？", "a": "温棚封闭高湿：光照弱（行为识别需补光）、氨氮易积累（换气受限）、温差小但病害温床。系统适配要点：补光下验证视觉指标、氨氮监测权重调高、预警阈值按棚内高密度收紧。", "refs": ["S9"]}, {"id": "QA-170", "cat": "养殖系统与品种", "q": "稻渔综合种养（虾稻/鱼稻）适用吗？", "a": "适用但场景差异大：稻田水位浅（0.3~0.8 m）、作物共生期用药受限、行为视场被稻株切割。浅水位下鱼群行为更易观测（距离近），但农药/施肥的事件管理比持续预警更重要。系统可作为水质监测+行为记录工具引入。", "refs": ["S9"]}, {"id": "QA-171", "cat": "养殖系统与品种", "q": "海水/咸淡水品种能直接用吗？", "a": "框架通用，参数全换：海水鱼（如石斑、大黄鱼）DO 需求与淡水不同、氨氮毒性受盐度与 pH 双重影响、行为基线（游速/群体结构）差异显著。按本图谱的“品种×密度×阶段”三元组方法重建参数集即可，架构无需改动。", "refs": ["S9"]}, {"id": "QA-172", "cat": "养殖系统与品种", "q": "苗种场（繁育场）适合部署吗？", "a": "高价值场景：苗种对水质与应激极敏感，人工看护成本高，自动预警价值最大。注意：苗种个体极小，视觉检测需更高分辨率或更近机位；行为指标以群体分布与活动量为主，个体轨迹可放弃。", "refs": ["S13", "S14"]}, {"id": "QA-173", "cat": "养殖系统与品种", "q": "出鱼/分塘前要做哪些准备？", "a": "出鱼前 24 h 停食（空肠空胃提高耐运性）、提前 2 天增氧改底（减少黏液与应激）、拉网时间选清晨低温、备好应急增氧。系统在出鱼期切换为“操作应激监测模式”：拉网应激数据可记录用于评估鱼体健康度。", "refs": ["S9"]}, {"id": "QA-174", "cat": "视觉感知技术", "q": "水面反光干扰怎么处理？", "a": "反光造成过曝区域伪运动。应对：①机位避开日光镜面反射角（垂直入射方向）；②偏振镜片；③算法侧对过曝像素（接近 255）做掩膜剔除。系统在帧差分前可加过曝掩膜，减少晴天午后的伪运动。", "refs": ["S13"]}, {"id": "QA-175", "cat": "视觉感知技术", "q": "增氧机开起来的水花会干扰识别吗？", "a": "会：气泡与水花产生大量伪运动像素，局部区域甚至完全遮蔽。应对：在系统配置中标注增氧机作用区（掩膜区域），该区域的运动能量不计入群体指标；或利用增氧机关停时段（投喂前停机 10 min）作为行为采样窗口——这也是图谱中投喂机与摄像头联动排程的依据。", "refs": ["S13"]}, {"id": "QA-176", "cat": "视觉感知技术", "q": "夜间红外/补光模式下颜色特征还有效吗？", "a": "红外模式下彩色信息丢失（灰度成像），但行为学核心指标（极化度、NND、游速）只依赖几何与运动，不依赖颜色——这正是选择几何行为指标的考虑之一。颜色类特征（体色变黑等）在夜间不可用，需白天观测补充。", "refs": ["S14"]}, {"id": "QA-177", "cat": "视觉感知技术", "q": "帧率和快门怎么设置？", "a": "帧率 25~30 fps；快门 ≥1/120 s 减少运动模糊（快门过慢鱼尾拖影会污染极化度计算）；曝光避免自动增益剧烈波动（夜间自动增益产生的亮度闪变会被误认为全局运动）。建议锁定曝光参数，配恒定补光。", "refs": ["S13"]}, {"id": "QA-178", "cat": "视觉感知技术", "q": "能顺便测量鱼体尺寸和体重吗？", "a": "可以延伸：已知机位高度与视场尺寸时，鱼体长（像素）可换算实际体长，结合体长-体重回归公式估算生物量。这是行为监测系统的自然扩展（生物量估算），精度受鱼体姿态与畸变影响，需标定。", "refs": ["S13"]}, {"id": "QA-179", "cat": "视觉感知技术", "q": "鱼群重叠成一团时怎么办？", "a": "极端重叠（产卵期/极度惊恐）下逐尾跟踪必然失败。系统策略：降级为“团块级”特征——群体轮廓面积、质心移动速度与整体密度变化仍可区分“聚集”与“分散”，维持预警能力；同时记录重叠度为置信度标记。", "refs": ["S11", "S13"]}, {"id": "QA-180", "cat": "融合与预测", "q": "模型推理的置信度怎么理解？", "a": "本系统的“支持度”是规则与启发式指标的支持强度（0~100%），不是深度模型的校准概率。使用原则：支持度<40% 仅记录不报警；40%~60% 报注意；>60% 且多指标交叉确认才触发预案。置信度阈值可按养殖场风险偏好配置。", "refs": ["S17"]}, {"id": "QA-181", "cat": "融合与预测", "q": "时间窗大小对结果敏感吗？", "a": "敏感：窗口太小（<30 s）传感数据尚未更新，视觉突变无法交叉验证；窗口太大（>5 min）瞬态应激被平均掉。1 min 窗口是“传感采样率×行为持续时间”的折中。对缓慢演化指标（氨氮）另设 10 min 慢窗口跟踪趋势。", "refs": ["S17"]}, {"id": "QA-182", "cat": "融合与预测", "q": "注意力权重能当“解释”用吗？", "a": "可以但需谨慎：注意力热力图展示模型“看哪里”，是合理的定性解释工具（异常焦点定位）；但学界提醒注意力权重不等于因果贡献。本系统以“注意力焦点+数值分量”双重呈现，避免单一解释依赖。", "refs": ["S15"]}, {"id": "QA-183", "cat": "融合与预测", "q": "训练这个融合网络需要多少数据？", "a": "经验量级：每类行为至少 300~500 个对齐窗口（约 15~25 h 视频），总量 5~8 万窗口起步可收敛；有物理仿真数据加持可减少真实标注需求 50% 以上。本系统 10 万帧规划即按此倒推。", "refs": ["S12", "S15"]}, {"id": "QA-184", "cat": "融合与预测", "q": "部署后模型还能继续学习吗？", "a": "可以：在线收集的新样本经人工复核后进入增量训练集，按月/季度微调（避免灾难性遗忘需混合旧数据重放）。知识图谱侧更新更轻量：新增实体/规则直接写入，无需重训模型——这正是图谱架构的可维护性优势。", "refs": ["S20", "S19"]}, {"id": "QA-185", "cat": "决策与图谱", "q": "图谱查询用什么语言？", "a": "Cypher（Neo4j 原生）。示例：查找“所有能被 DO 触发的预案”——MATCH (w:WQ {name:'溶解氧 DO'})-[:TRIGGERS]->(p:PLN) RETURN p.name。系统预置 browser_queries.cypher 收录 9 组常用查询，覆盖管理高频场景。", "refs": ["S20"]}, {"id": "QA-186", "cat": "决策与图谱", "q": "两条预案规则冲突了怎么办？", "a": "优先级仲裁：危急级 > 预警级 > 注意级 > 维持级；同级冲突按“动作代价小者优先”（停喂 < 换水 < 全功率增氧）。系统 Top-K 检索天然按相似度排序，相似度相同时按预案等级（pl8 > pl1 > …）稳定排序，避免输出抖动。", "refs": ["S20", "S9"]}, {"id": "QA-187", "cat": "决策与图谱", "q": "领域知识冷启动怎么办？", "a": "本图谱已完成冷启动（113 实体冷启动知识库）。对新区块（如新品种）：①复用通用水质阈值实体；②品种专属实体从教材/文献增量导入；③行为基线通过 1~2 周监测数据自动统计生成。知识来源模板化，扩充成本可控。", "refs": ["S6", "S9"]}, {"id": "QA-188", "cat": "决策与图谱", "q": "LLM 需要微调吗？还是 RAG 就够？", "a": "本场景 RAG 足够且更优：知识更新频繁（阈值/预案会修订），RAG 换知识不换模型；微调适合固化“表达风格”而非“知识内容”。若未来需要更专业的日志措辞，可用 LoRA 在日志样本上轻微微调，与 RAG 并存。", "refs": ["S19", "S21"]}, {"id": "QA-189", "cat": "决策与图谱", "q": "人机协同的界面怎么设计才安全？", "a": "三原则：①建议与理由同屏（每条方案附触发条件与文献依据）；②执行前确认（危急动作需人工点击确认，系统不直接控制设备）；③全程留痕（确认人、时间、依据写入日志）。本系统的“虚拟决策”定位天然满足①③，②由部署方接入设备控制时实现。", "refs": ["S20", "S21"]}, {"id": "QA-190", "cat": "预案与设备", "q": "溶氧电极多久校准一次？", "a": "荧光法电极：每 1~2 个月校准一次（空气校准法），每半年检查膜帽与电解液；极谱法：每 2~4 周校准。现场快速核查法：与手持式溶氧仪同点比对，偏差 >0.3 mg/L 即需校准。传感器漂移是预警系统最大的隐性风险。", "refs": ["S9"]}, {"id": "QA-191", "cat": "预案与设备", "q": "停电了怎么办？", "a": "停电即失去增氧能力，是泛塘的最高危场景。配置：①备用发电机（柴油，自动切换）+ 油料储备 ≥8 h；②或配蓄电池+逆变应急增氧机；③停电期间人工泼洒粒粒氧（过碳酸钠）应急。系统在日志中提示“停电即进入人工值守模式”。", "refs": ["S23"]}, {"id": "QA-192", "cat": "预案与设备", "q": "投喂机精度对系统有什么影响？", "a": "投喂机的投喂量精度直接决定“投饵调节”预案的执行精度：误差 >20% 会让“减量 20%”形同虚设。定期校准：称量实际出料量与设定值比对，误差控制在 ±5%。系统按“设定投喂量”估算 BOD 负荷，投喂机失准会导致水质预测偏差。", "refs": ["S9"]}, {"id": "QA-204", "cat": "预案与设备", "q": "设备之间怎么联动？协议是什么？", "a": "常见方案：Modbus RTU/TCP（工业设备标准）或 MQTT（物联网轻量协议）。系统输出“预案指令”（JSON：设备、动作、参数、时限），由现场控制器转换为设备协议执行。指令与执行回执均写入日志，实现闭环审计。", "refs": ["S23"]}, {"id": "QA-194", "cat": "预案与设备", "q": "水质突变预警的“哨兵值”怎么设？", "a": "哨兵 = 变化率而非绝对值：DO 每小时下降 >1.5 mg/L、pH 日变化 >0.8、氨氮 24 h 升幅 >0.2 mg/L 即触发“趋势哨兵”——比绝对阈值更早发现苗头。趋势哨兵与本系统的绝对阈值预警并联运行，双保险。", "refs": ["S9"]}, {"id": "QA-195", "cat": "数据与仿真", "q": "仿真数据毕竟不是真实数据，怎么验证它有效？", "a": "三步验证法：①物理一致性（曲线符合动力学预期，本系统已验证）；②统计相似性（与少量实测数据比对分布形态：均值/方差/自相关）；③下游有效性（用仿真数据训练的模型在少量真实标注上微调后仍达标准确率）。本项目论文讨论章节即按此框架披露局限。", "refs": ["S7", "S9"]}, {"id": "QA-196", "cat": "数据与仿真", "q": "域适应（sim-to-real）具体怎么做？", "a": "低成本路径：①统计对齐（用少量真实数据估计均值/方差，重标仿真分布）；②特征级对齐（在融合网络前加域对抗层）；③少量微调（真实数据 10%~20% 混入训练集微调）。本项目把①作为首期方案——成本最低且足以消除主要偏差。", "refs": ["S17"]}, {"id": "QA-197", "cat": "数据与仿真", "q": "长期部署后数据回流怎么管理？", "a": "数据回流三原则：①真实传感数据按月归档并与当期仿真参数快照绑定；②模型版本与数据版本配对管理（模型-vX 对应数据-vY）；③回流数据先人工抽检再入库，防止坏数据污染训练集。回流数据是缩小 sim-to-real 差距的核心资产。", "refs": ["S17"]}, {"id": "QA-198", "cat": "数据与仿真", "q": "仿真参数怎么从真实数据反演？", "a": "参数辨识：以实测 DO 序列为目标，优化 r0/kBOD/Ka 使仿真曲线与实测误差最小（网格搜索或最小二乘）。辨识出的参数代表本地塘口的物理特性，反哺仿真生成更贴近本场的训练数据——这也是“数据随场定制”的技术路径。", "refs": ["S7", "S9"]}, {"id": "QA-199", "cat": "数据与仿真", "q": "多模态对齐有误差吗？", "a": "有且必须管理：视觉时间戳来自帧率（±33 ms）、传感时间戳来自采样周期（±30 s）、仿真步长误差（±1 min）。对齐误差控制在传感采样周期的一半以内（±30 s）即可接受；系统在数据集中记录每对样本的对齐偏差，供下游加权。", "refs": ["S17"]}, {"id": "QA-200", "cat": "系统与部署", "q": "站点怎么更新升级？", "a": "纯静态站点升级 = 覆盖 index.html 后推送（git pull 或 GitHub Pages 重新部署），秒级生效且无停机。数据内嵌在页面中，更新问答内容即更新站点。建议用 git 管理每次变更，可随时回滚。", "refs": ["S13"]}, {"id": "QA-201", "cat": "系统与部署", "q": "需要多用户权限管理吗？", "a": "问答站与预测站为公开只读工具，无需权限。生产部署的决策系统建议两级权限：管理员（配置阈值/预案）与操作员（查看/确认/导出日志），配合 Neo4j 角色与日志审计实现。", "refs": ["S20"]}, {"id": "QA-202", "cat": "系统与部署", "q": "数据要备份吗？怎么备？", "a": "要。三类数据三类备份：①决策日志（每日导出归档，文本格式轻量）；②Neo4j 库（定期 dump：neo4j-admin database dump，每周全量）；③站点与代码（git 仓库本身即备份）。本项目的构建脚本可随时从数据源重建，天然具备可复现性。", "refs": ["S19"]}, {"id": "QA-203", "cat": "系统与部署", "q": "能扩展到虾、蟹等其他品种吗？", "a": "架构完全通用，品种适配只需三步：①重建行为本体（虾的行为集与鱼不同：蜕壳、攀爬、聚群伏底）；②重建水质阈值集（虾类对氨氮/亚硝酸盐更敏感）；③重标行为基线参数。知识图谱的 Schema 无需改动——这正是本体化设计的价值。", "refs": ["S9", "S14"]}, {"id": "QA-205", "cat": "系统与部署", "q": "有 API 接口吗？方便对接第三方平台。", "a": "有：决策系统输出标准 JSON（态势、风险等级、触发预案、设备动作、时间戳），通过 WebHook/MQTT 推送给第三方平台；Neo4j 提供 Bolt/HTTP 查询接口；问答与预测站点为纯前端，可直接 iframe 嵌入。接口文档见仓库 README。", "refs": ["S20"]}], "meta": {"title": "多模态鱼类行为预测 · 知识库问答", "version": "2.0", "note": "内容与项目知识图谱 v3 同源，阈值与结论均标注文献/标准依据；系统类问题以项目实际实现口径回答。"}};
+const ALIAS = {
+ "温度":["水温","代谢","q10"],"10万帧":["十万帧","100000帧","帧"],
+ "4bit":["4 bit","int4","int 4","量化"],"int4":["4 bit","量化"],
+ "参考文献":["文献","依据","出处"],"safety":["安全"],
+ "oxygen":["溶氧","do"],"ammonia":["氨氮"],"temperature":["水温"],
+ "致死":["死亡","泛塘"],"缺氧":["溶氧","浮头"],"应激":["狂游","极化度","皮质醇"],
+ "投喂":["投饵","喂料","饲料"],"设备":["增氧机","水泵","投喂机"],
+ "模型":["yolov8","transformer","llm"],"成本":["硬件","价格","费用"]
+};
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const flat = s => s.toLowerCase().replace(/\s+/g,"");
+function expandKw(kw){
+  let ks=[kw]; const k=kw.toLowerCase();
+  for(const a in ALIAS) if(k.includes(a)) ALIAS[a].forEach(x=>ks.push(x.toLowerCase()));
+  return ks;
+}
+function hitTest(it,ks){ return ks.some(k=>flat(it.id+" "+it.cat+" "+it.q+" "+it.a+" "+it.refs.join(" ")).includes(flat(k))); }
+function hl(s,ks){
+  let out=esc(s);
+  ks.forEach(k=>{ if(k.length<1)return;
+    out=out.replace(new RegExp("("+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi"),"<mark>$1</mark>"); });
+  return out;
+}
+let cat=null, kw="";
+function refChips(refs){
+  return '<span class="refs"><span class="rlbl">依据：</span>'+refs.map(t=>
+    '<span class="ref" data-ref="'+t+'">['+t+']</span>').join("")+'</span>';
+}
+function card(it,ks){
+  return '<div class="card" data-id="'+it.id+'"><div class="qrow" onclick="this.parentElement.classList.toggle(\'open\')">'+
+    '<span class="qid">'+it.id+'</span><span class="qt">'+hl(it.q,ks)+'</span>'+
+    '<span class="catchip">'+it.cat+'</span><span class="caret">▶</span></div>'+
+    '<div class="ans">'+hl(it.a,ks)+refChips(it.refs)+'</div></div>';
+}
+function renderQA(){
+  const ks = kw?expandKw(kw):[];
+  const items = DATA.items.filter(it=>(!cat||it.cat===cat)&&(!kw||hitTest(it,ks)));
+  $("cnt").textContent = "共 "+items.length+" 条"+(cat?" · "+cat:"")+(kw?' · 关键词 "'+kw+'"':"");
+  if(!cat && !kw){
+    let html="";
+    for(const c of DATA.cats){
+      const g=items.filter(it=>it.cat===c);
+      if(!g.length)continue;
+      html+='<div class="sect"><span class="dot"></span><span class="st">'+c+'</span><span class="sc">'+g.length+' 条</span><span class="sl"></span></div>'+g.map(it=>card(it,[])).join("");
+    }
+    $("list").innerHTML=html;
+  } else {
+    $("list").innerHTML=items.length?items.map(it=>card(it,ks)).join(""):
+      '<div class="none">没有匹配的条目——试试同义词（如"温度"会自动匹配"水温"），或清除分类筛选。</div>';
+  }
+}
+function renderCats(){
+  const counts={}; DATA.items.forEach(it=>counts[it.cat]=(counts[it.cat]||0)+1);
+  $("cats").innerHTML='<span class="cat'+(cat?"":" on")+'" data-c="">全部 <b>'+DATA.items.length+'</b></span>'+
+    DATA.cats.map(c=>'<span class="cat'+(cat===c?" on":"")+'" data-c="'+c+'">'+c+' <b>'+(counts[c]||0)+'</b></span>').join("");
+  document.querySelectorAll(".cat").forEach(el=>el.addEventListener("click",()=>{cat=el.dataset.c||null;renderCats();renderQA();}));
+}
+function go(s){ switchTo(s); }
+function switchTo(s){
+  document.querySelectorAll(".navb").forEach(b=>b.classList.toggle("on",b.dataset.s===s));
+  document.querySelectorAll(".section").forEach(x=>x.classList.toggle("on",x.id==="s-"+s));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".navb").forEach(b=>b.addEventListener("click",()=>switchTo(b.dataset.s)));
+document.querySelectorAll(".mod").forEach(m=>m.addEventListener("click",()=>switchTo(m.getAttribute("onclick").match(/'(\w+)'/)[1])));
+$("q").addEventListener("input",e=>{kw=e.target.value.trim();renderQA();});
+$("btnExpand").addEventListener("click",()=>{
+  const cards=document.querySelectorAll("#list .card");
+  const anyClosed=[...cards].some(c=>!c.classList.contains("open"));
+  cards.forEach(c=>c.classList.toggle("open",anyClosed));
+});
+document.addEventListener("click",e=>{
+  const r=e.target.closest(".ref");
+  if(r){switchTo("refs");
+    const el=document.getElementById("ref-"+r.dataset.ref);
+    if(el){setTimeout(()=>{el.scrollIntoView({block:"center"});el.style.background="rgba(245,178,60,.15)";setTimeout(()=>el.style.background="",1500);},80);}
+  }
+});
+window.addEventListener("scroll",()=>{$("toTop").classList.toggle("show",window.scrollY>600);});
+$("toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+$("stN").textContent=DATA.items.length;
+$("stC").textContent=DATA.cats.length;
+$("stR").textContent=DATA.refs.length;
+$("stV").textContent=DATA.meta.version;
+$("nvQa").textContent=DATA.items.length;
+$("nvRef").textContent=DATA.refs.length;
+$("reflist").innerHTML=(function(){
+  const groups={}; DATA.refs.forEach(r=>(groups[r.cat]=groups[r.cat]||[]).push(r));
+  let html="";
+  for(const g in groups){
+    html+='<h3 class="sub">'+g+'（'+groups[g].length+'）</h3>';
+    html+=groups[g].map(r=>'<div class="rf" id="ref-'+r.tag+'"><span class="tg">['+r.tag+']</span>'+esc(r.t)+'<span class="cn">'+r.cat+'</span><span class="nt">要点：'+esc(r.n)+'</span></div>').join("");
+  }
+  return html;
+})();
+renderCats();
+renderQA();
+</script>
+</body>
+</html>
